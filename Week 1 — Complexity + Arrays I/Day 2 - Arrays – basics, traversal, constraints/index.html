@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 2: Arrays – Basics, Traversal, Constraints (Intensive)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chosen Palette: Slate & Emerald Minimalist (Professional, crisp contrasts for reading) -->
+    
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; scroll-behavior: smooth; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .nav-active { background-color: #ecfdf5; color: #047857; border-right: 4px solid #047857; font-weight: 600; }
+        pre { background-color: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col h-full z-10 shadow-sm">
+        <div class="p-6 border-b border-slate-200">
+            <h1 class="text-xl font-bold text-slate-900 leading-tight">Array Mastery</h1>
+            <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Day 2 &bull; Core Primative</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 hide-scroll" id="sidebar-nav">
+            <button onclick="switchTab('block1')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors nav-active" data-target="block1">
+                &#128218; Block 1: Architecture
+            </button>
+            <button onclick="switchTab('block2')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors" data-target="block2">
+                &#9881; Block 2: Problem Set
+            </button>
+            <button onclick="switchTab('block3')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors" data-target="block3">
+                &#128062; Block 3: Edge Cases
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-200 text-xs text-center text-slate-400">
+            ICPC / Codeforces Prep
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full bg-slate-50 relative pb-20">
+        <div class="max-w-5xl mx-auto px-8 py-12">
+            
+            <!-- BLOCK 1: ARCHITECTURE -->
+            <section id="block1" class="tab-content block">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-slate-900">Block 1: Architectural Design</h2>
+                    <p class="text-lg text-slate-600 mt-2">The array represents the most direct abstraction of physical memory.</p>
+                </header>
+
+                <div class="space-y-12">
+                    <!-- Memory Models -->
+                    <div>
+                        <h3 class="text-2xl font-bold border-b pb-2 mb-4 text-slate-800">1. Static Arrays vs Heap Allocation</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                                <h4 class="font-bold text-lg text-slate-900 mb-2">Stack (Static)</h4>
+                                <p class="text-sm text-slate-600 mb-4">Governed by the compiler counting down the stack pointer. Nearly instantaneous allocation. Finite resource (1–8 MB).</p>
+                                <div class="bg-slate-100 p-3 rounded font-mono text-xs text-slate-700">int arr[100];</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                                <h4 class="font-bold text-lg text-slate-900 mb-2">Heap (Dynamic)</h4>
+                                <p class="text-sm text-slate-600 mb-4">Size can be resolved at runtime. Persists until `delete[]`. Higher allocation overhead and risks fragmentation without RAII.</p>
+                                <div class="bg-slate-100 p-3 rounded font-mono text-xs text-slate-700">int* arr = new int[n];</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indexing Math -->
+                    <div>
+                        <h3 class="text-2xl font-bold border-b pb-2 mb-4 text-slate-800">2. Address Arithmetic & O(1) Fetch</h3>
+                        <p class="text-slate-700 mb-4">Because elements are contiguous, address calculation is a pure algebraic function. Zero-based indexing prevents $Index - 1$ calculations.</p>
+                        
+                        <div class="bg-slate-900 p-6 rounded-xl shadow-sm text-white font-mono text-center text-lg mb-4 tracking-wider">
+                            Address = Base + (Index <span class="text-emerald-400">&times;</span> sizeof(Type))
+                        </div>
+                        
+                        <p class="text-sm text-slate-600 bg-emerald-50 border border-emerald-100 p-4 rounded-lg">
+                            <strong class="text-emerald-800">C++ Pointer Translation:</strong> A dereference like `arr[i]` strictly translates to the pointer jump `*(arr + i)`. There are zero bounds checks natively.
+                        </p>
+                    </div>
+
+                    <!-- Amortized -->
+                    <div>
+                        <h3 class="text-2xl font-bold border-b pb-2 mb-4 text-slate-800">3. std::vector & Amortization</h3>
+                        <p class="text-slate-700 mb-4">A `vector` has `size` and `capacity`. When full, hitting `push_back(val)` forces a reallocation: an $O(n)$ process to allocate $2 \times$ space and move everything over.</p>
+                        <p class="text-slate-700">Using the Potential Method ($\Phi = 2 \times Size - Capacity$), the $O(1)$ operations "save up energy" to strictly pay for the $O(n)$ reallocation moving cost, proving Amortized $O(1)$ overall.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- BLOCK 2: PROBLEMS -->
+            <section id="block2" class="tab-content hidden">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-slate-900">Block 2: Core Array Problems (12 Patterns)</h2>
+                    <p class="text-lg text-slate-600 mt-2">Segregated problem mechanics. Test your pattern recognition.</p>
+                </header>
+
+                <div id="snippet-container" class="grid grid-cols-1 gap-6">
+                    <!-- Snippets injected by JS -->
+                </div>
+            </section>
+
+            <!-- BLOCK 3: EDGE CASES -->
+            <section id="block3" class="tab-content hidden">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-slate-900">Block 3: Constraints & Edge Cases</h2>
+                    <p class="text-lg text-slate-600 mt-2">Checklists for Technical Interviews & CP Audits.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800">The Edge Case Checklist</h3>
+                        <ul class="space-y-3 text-slate-700 text-sm">
+                            <li class="flex items-start"><span class="mr-2 text-emerald-600 font-bold">&check;</span> <strong>Empty Arrays:</strong> Return safely (0, -1, {}, etc.) when n=0.</li>
+                            <li class="flex items-start"><span class="mr-2 text-emerald-600 font-bold">&check;</span> <strong>Single Element:</strong> Algorithms like 'Majority' or 'Rotations' behave uniquely at n=1.</li>
+                            <li class="flex items-start"><span class="mr-2 text-emerald-600 font-bold">&check;</span> <strong>Duplicates:</strong> Can Two-Sum handle [3,3] correctly for target=6 without reusing index 0 twice?</li>
+                            <li class="flex items-start"><span class="mr-2 text-emerald-600 font-bold">&check;</span> <strong>Negative Inputs:</strong> Are your Prefix Max/Min arrays robust against arrays consisting solely of negatives?</li>
+                            <li class="flex items-start"><span class="mr-2 text-red-600 font-bold">X</span> <strong>Integer Overflow:</strong> If array elements are $10^9$ and $n=10^5$, sums exceed 32-bit `int`. Always accumulate in `long long`!</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900 text-slate-200 p-6 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-center">
+                         <h3 class="text-xl font-bold mb-4 text-white">Cache Performance (Memory Wall)</h3>
+                         <p class="text-sm text-slate-300 leading-relaxed">
+                            Cache lines load 64-bytes at a time. An array fetch natively pre-loads the next several items into L1 Cache (Spatial Locality). 
+                            <br><br>
+                            If you allocate a `matrix[R][C]`, looping C inside R (Row-major) is lightning fast. Looping R inside C (Column-major jump) causes cache misses on every access.
+                         </p>
+                    </div>
+
+                </div>
+            </section>
+            
+        </div>
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('nav-active'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelector(`[data-target="${tabId}"]`).classList.add('nav-active');
+        }
+
+        // --- Block 2: 12 Problems Data ---
+        const problems = [
+            { 
+              title: "1. Two Sum", cat: "Trade-offs",
+              desc: "Find indices summing to target.",
+              ap1: "Hash Map: Iterate and store target-nums[i]. O(n) space/time.",
+              ap2: "Two-Pointer: If sorted, pointers at ends converging. O(1) space."
+            },
+            { 
+              title: "2. Remove Element", cat: "Fast-Slow Pointer",
+              desc: "In-place removal of all instances of `val`.",
+              ap1: "Maintain slow `write_ptr` that increments only when fast `read_ptr` finds valid elements to copy.",
+              ap2: ""
+            },
+            { 
+              title: "3. Move Zeroes", cat: "In-Place Modifications",
+              desc: "Push zeroes back while maintaining non-zero order.",
+              ap1: "Slow pointer targets next open slot, fast hunts non-zeros. Swap them when found, bubbling zero.",
+              ap2: ""
+            },
+            { 
+              title: "4. Beautiful Matrix", cat: "Mathematical Logic",
+              desc: "5x5 grid, move a '1' to (2,2) with swaps.",
+              ap1: "Do not simulate grid state. Calculate Manhattan Distance: |r - 2| + |c - 2|.",
+              ap2: ""
+            },
+            { 
+              title: "5. Even Odds", cat: "Constraints Management",
+              desc: "Given sequence $1..N$ odds then evens. Find K-th. $N = 10^{12}$.",
+              ap1: "Arrays physically crash at $10^{12}$. Resolve mathematically. Count odds. If $K \\le odd$, return $2K - 1$. Else return even math.",
+              ap2: ""
+            },
+            { 
+              title: "6. Majority Element", cat: "Boyer-Moore Voting",
+              desc: "Find element appearing > n/2 times.",
+              ap1: "Maintain candidate and count. On match, count++. On mismatch, count--. If count=0 switch candidate. Majority survives attrition.",
+              ap2: "O(n) time, O(1) space."
+            },
+            { 
+              title: "7. Find Pivot Index", cat: "Prefix/Suffix Math",
+              desc: "Index where left sum == right sum.",
+              ap1: "Precalc total sum. Iterate keeping left_sum. right_sum = total - left - arr[i]. Check match in O(1).",
+              ap2: ""
+            },
+            { 
+              title: "8. Product Except Self", cat: "Prefix Arrays",
+              desc: "Find products without division.",
+              ap1: "Build array of cumulative products to the left of i. Then backward pass multiplying by running suffix products.",
+              ap2: "Results array does not count towards auxiliary space."
+            },
+            { 
+              title: "9. Missing Number", cat: "Bitwise Logic",
+              desc: "Find single missing integer $0..N$.",
+              ap1: "Sum formula $\\frac{N(N+1)}{2}$ easily overflows. Use XOR instead: $x \\oplus x = 0$.",
+              ap2: "XOR 0..N, then XOR array elements. Missing number remains."
+            },
+            { 
+              title: "10. Rotate Array", cat: "Spatial Logic",
+              desc: "Shift right by K in O(1) space.",
+              ap1: "The Triple Reverse Trick. Reserve entire array structure.",
+              ap2: "Reverse(0, k-1) then Reverse(k, n-1) to reorient chunks."
+            },
+            { 
+              title: "11. Merge Sorted Array", cat: "Buffer Management",
+              desc: "Merge inside first array padded with zeros.",
+              ap1: "Reverse-Merge. Start at back of array checking maximums to avoid overwriting unread elements.",
+              ap2: ""
+            },
+            { 
+              title: "12. Sort Colors", cat: "Dutch National Flag",
+              desc: "Sort 0s, 1s, 2s in-place one pass.",
+              ap1: "Three pointers: low(0), mid(1), high(2). Iterate mid.",
+              ap2: "Trap: When swapping 2 dynamically from `high` into `mid`, do NOT increment `mid`. It must be re-checked!"
+            }
+        ];
+
+        const container = document.getElementById('snippet-container');
+        problems.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = "bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden p-6";
+            
+            let aps = `<p class="text-emerald-700 text-sm mt-2 font-mono pb-1 border-b border-emerald-100">${item.ap1}</p>`;
+            if (item.ap2) {
+                 aps += `<p class="text-emerald-700 text-sm mt-1 font-mono">${item.ap2}</p>`;
+            }
+
+            card.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3">
+                    <h3 class="font-bold text-lg text-slate-800">${item.title}</h3>
+                    <span class="text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-600 px-3 py-1 rounded mt-2 sm:mt-0 w-max">${item.cat}</span>
+                </div>
+                <p class="text-slate-600 text-sm mb-4">${item.desc}</p>
+                <div class="bg-emerald-50 border border-emerald-100 rounded p-4">
+                    <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2">Optimal Approach</h4>
+                    ${aps}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+    </script>
+</body>
+</html>
