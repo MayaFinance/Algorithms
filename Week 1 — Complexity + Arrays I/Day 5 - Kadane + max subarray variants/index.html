@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 5: Kadane's Algorithm Mastery Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto; height: 250px; max-height: 250px; }
+        .task-checkbox { appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor; width: 1.5em; height: 1.5em; border: 2px solid #cbd5e1; border-radius: 0.25em; display: grid; place-content: center; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .task-checkbox::before { content: ""; width: 0.8em; height: 0.8em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+        .task-checkbox:checked { background-color: #7c3aed; border-color: #7c3aed; }
+        .task-checkbox:checked::before { transform: scale(1); }
+        .task-row { transition: all 0.3s ease; }
+        .task-row.completed .task-text { color: #94a3b8; text-decoration: line-through; }
+        .task-row.completed .problem-desc { opacity: 0.5; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        pre, code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-16 bg-slate-50">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">DAY 5</h1>
+                <p class="text-sm font-semibold text-slate-500 tracking-widest uppercase mt-1">Algorithm Bootcamp</p>
+            </div>
+            <div class="sm:text-right bg-violet-50 px-4 py-2 rounded-lg border border-violet-100">
+                <div class="text-xl font-bold text-violet-700">Kadane's Algorithm</div>
+                <div class="text-xs font-bold text-violet-500 uppercase tracking-wide flex items-center gap-1">
+                    <span class="text-base">⚡</span> O(n) Sequence Optimization
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+                <section class="bg-violet-700 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-28 h-28 bg-white opacity-10 rounded-full blur-2xl"></div>
+                    <h2 class="text-lg font-bold flex items-center gap-2 mb-2">
+                        <span class="text-2xl">🎯</span> The Core Goal
+                    </h2>
+                    <p class="text-violet-100 text-sm leading-relaxed mb-4">Master the fundamental state-reset DP insight: <strong class="bg-violet-900 text-white px-1.5 py-0.5 rounded shadow-inner font-mono text-xs">f(i) = max(A[i], f(i-1) + A[i])</strong>. Extend to circular, product, deletion, absolute, and 2D variants.</p>
+                </section>
+
+                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">Study Progress</h3>
+                        <p class="text-sm text-slate-500">Track your 14-hour mastery plan.</p>
+                    </div>
+                    <div class="chart-container mb-6">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div class="text-3xl font-extrabold text-slate-800" id="hoursCompleted">0<span class="text-lg text-slate-500 font-medium">h</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Completed</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div class="text-3xl font-extrabold text-slate-800">14<span class="text-lg text-slate-500 font-medium">h</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Total Planned</div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-bold text-slate-700">Completion</span>
+                            <span class="font-bold text-violet-600" id="percentText">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner overflow-hidden">
+                            <div class="bg-violet-600 h-3 rounded-full transition-all duration-700 ease-out w-0" id="progressBar"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                <div class="mb-2">
+                    <h2 class="text-2xl font-bold text-slate-800">14-Hour Mastery Plan</h2>
+                    <p class="text-slate-600 mt-1">From historical origins to 2D spatial optimization and segment trees.</p>
+                </div>
+
+                <!-- BLOCK 1: THEORY -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-violet-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📚</span> Block 1 — Theory & Mathematical Foundations</h2>
+                        <span class="bg-violet-100 text-violet-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 3 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+
+                        <div class="bg-violet-50 p-4 border-l-4 border-violet-500 rounded-r-lg text-violet-900 text-sm mb-4">
+                            <strong>Jay Kadane's Insight (1984):</strong> Instead of re-evaluating all possible start/end pairs, track just one number —<em>the best possible sum that MUST end at the current position</em>. If extending from the past helps, do it. If not, start fresh.
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-t1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-violet-700 text-lg">The DP Recurrence</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Formalize the local/global relationship.</p>
+                                <button onclick="toggleAnswer('ans-t1')" class="text-xs bg-violet-100 text-violet-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-t1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl text-slate-300">
+                                    <div class="bg-slate-900 border border-slate-700 p-3 rounded font-mono text-center text-violet-300 mb-3">
+                                        f(i) = max(A[i], f(i-1) + A[i])
+                                    </div>
+                                    <p class="text-xs">If <code>f(i-1)</code> is <strong class="text-red-400">negative</strong>: reset — start fresh at A[i].<br>If <code>f(i-1)</code> is <strong class="text-emerald-400">positive</strong>: extend — adding it only helps.<br>Global max = max over all f(i).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-t2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-violet-700 text-lg">Dry Run: A = [-2,1,-3,4,-1,2,1,-5,4]</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-t2')" class="text-xs bg-violet-100 text-violet-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Walkthrough</button>
+                                <div id="ans-t2" class="hidden mt-3 overflow-x-auto border border-slate-200 rounded text-sm bg-white">
+                                    <table class="min-w-full text-left text-xs">
+                                        <thead class="bg-slate-100"><tr><th class="p-2 border-b">Index</th><th class="p-2 border-b">Element</th><th class="p-2 border-b">Local Max</th><th class="p-2 border-b">Global Max</th></tr></thead>
+                                        <tbody id="dryRunTable"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-t3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-violet-700 text-lg">Code Standard Kadane (LeetCode 53)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-t3')" class="text-xs bg-violet-100 text-violet-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                                <div id="ans-t3" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-violet-200 overflow-x-auto"><code>int maxSubArray(vector&lt;int&gt;& nums) {
+    int curr = nums[0], best = nums[0];
+    for (int i = 1; i &lt; nums.size(); i++) {
+        curr = max(nums[i], curr + nums[i]);
+        best = max(best, curr);
+    }
+    return best;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 2: CORE VARIANTS -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔄</span> Block 2 — Core Variants</h2>
+                        <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 4 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-v1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('v1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Circular Subarray (LeetCode 918)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Dual case: non-wrap (standard Kadane) vs wrap (total - min_subarray).</p>
+                                <button onclick="toggleAnswer('ans-v1')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-v1" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-rose-200 overflow-x-auto"><code>int maxSubarraySumCircular(vector&lt;int&gt;& nums) {
+    int total=0, max_s=nums[0], curr_max=nums[0];
+    int min_s=nums[0], curr_min=nums[0];
+    for (int i=1; i&lt;nums.size(); i++) {
+        curr_max = max(nums[i], curr_max + nums[i]);
+        max_s = max(max_s, curr_max);
+        curr_min = min(nums[i], curr_min + nums[i]);
+        min_s = min(min_s, curr_min);
+        total += nums[i];
+    }
+    total += nums[0];
+    // Guard: all-negative case
+    return (total == min_s) ? max_s : max(max_s, total - min_s);
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-v2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('v2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Maximum Product Subarray (LeetCode 152)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Track both curr_max and curr_min — a negative flips to become the new max.</p>
+                                <button onclick="toggleAnswer('ans-v2')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-v2" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-rose-200 overflow-x-auto"><code>int maxProduct(vector&lt;int&gt;& nums) {
+    int cmax=nums[0], cmin=nums[0], res=nums[0];
+    for (int i=1; i&lt;nums.size(); i++) {
+        int x = nums[i];
+        int tmax = max({x, cmax*x, cmin*x});
+        int tmin = min({x, cmax*x, cmin*x});
+        cmax = tmax; cmin = tmin;
+        res = max(res, cmax);
+    }
+    return res;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-v3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('v3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Best Time to Buy & Sell Stock (LeetCode 121)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Classic Kadane in disguise: track running min price + max profit.</p>
+                                <button onclick="toggleAnswer('ans-v3')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-v3" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-rose-200 overflow-x-auto"><code>int maxProfit(vector&lt;int&gt;& prices) {
+    int min_p = INT_MAX, profit = 0;
+    for (int p : prices) {
+        min_p  = min(min_p, p);
+        profit = max(profit, p - min_p);
+    }
+    return profit;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-v4">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('v4')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Max Subarray with One Deletion (LeetCode 1186)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Two Kadane passes: left[i] + right[i] bridged at each deletion point k.</p>
+                                <button onclick="toggleAnswer('ans-v4')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-v4" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-rose-200 overflow-x-auto"><code>int maximumSum(vector&lt;int&gt;& arr) {
+    int n = arr.size();
+    vector&lt;int&gt; L(n), R(n);
+    L[0] = arr[0];
+    for (int i=1; i&lt;n; i++)
+        L[i] = max(arr[i], L[i-1]+arr[i]);
+    R[n-1] = arr[n-1];
+    for (int i=n-2; i&gt;=0; i--)
+        R[i] = max(arr[i], R[i+1]+arr[i]);
+    int res = *max_element(L.begin(), L.end());
+    for (int k=1; k&lt;n-1; k++)
+        res = max(res, L[k-1] + R[k+1]);
+    return res;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 3: ADVANCED -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔥</span> Block 3 — Advanced Variants</h2>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 4 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-a1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('a1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-emerald-700 text-lg">Maximum Absolute Sum (LeetCode 1749)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Track both ends: max Kadane and min Kadane simultaneously.</p>
+                                <button onclick="toggleAnswer('ans-a1')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-a1" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-emerald-200 overflow-x-auto"><code>int maxAbsoluteSum(vector&lt;int&gt;& nums) {
+    int f=0, g=0, ans=0;
+    for (int x : nums) {
+        f = max(f,0) + x;      // max ending here
+        g = min(g,0) + x;      // min ending here
+        ans = max({ans, f, abs(g)});
+    }
+    return ans;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-a2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('a2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-emerald-700 text-lg">2D Maximum Sum Rectangle</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Row-compress each column pair into 1D → run Kadane. O(C² × R).</p>
+                                <button onclick="toggleAnswer('ans-a2')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-a2" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-emerald-200 overflow-x-auto"><code>int maxSumRectangle(vector&lt;vector&lt;int&gt;&gt;& M) {
+    int R=M.size(), C=M[0].size(), best=INT_MIN;
+    for (int l=0; l&lt;C; l++) {
+        vector&lt;int&gt; rs(R, 0);
+        for (int r=l; r&lt;C; r++) {
+            for (int i=0; i&lt;R; i++) rs[i] += M[i][r];
+            // Kadane on rs[]
+            int c=rs[0], b=rs[0];
+            for (int i=1; i&lt;R; i++) {
+                c = max(rs[i], c+rs[i]);
+                b = max(b, c);
+            }
+            best = max(best, b);
+        }
+    }
+    return best;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-a3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('a3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-emerald-700 text-lg">Subarray Sum = K (LC 560) — When NOT to use Kadane</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Kadane maximizes. For exact targets, use Prefix Sum + HashMap instead.</p>
+                                <button onclick="toggleAnswer('ans-a3')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code</button>
+                                <div id="ans-a3" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                    <pre class="text-xs text-emerald-200 overflow-x-auto"><code>int subarraySum(vector&lt;int&gt;& nums, int k) {
+    unordered_map&lt;int,int&gt; mp; mp[0]=1;
+    int sum=0, cnt=0;
+    for (int x : nums) {
+        sum += x;
+        cnt += mp[sum - k];
+        mp[sum]++;
+    }
+    return cnt;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 4: SEGMENT TREE -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🌳</span> Block 4 — Segment Trees for Range Queries</h2>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 3 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg text-amber-900 text-sm mb-2">
+                            <strong>When does standard Kadane fail?</strong> When you receive multiple range queries [l, r] asking for max subarray in that range. Kadane does O(n) per query. A Segment Tree answers in O(log n).
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl group" id="task-s1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('s1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-amber-700 text-lg">Augmented Node Structure</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-s1')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-s1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl text-slate-300">
+                                    <p class="text-sm mb-2">Each segment tree node must store 4 values:</p>
+                                    <ul class="text-xs list-disc ml-4 space-y-1">
+                                        <li><code class="text-amber-300">total</code> — Sum of all elements in range</li>
+                                        <li><code class="text-amber-300">max_prefix</code> — Largest sum starting from left of range</li>
+                                        <li><code class="text-amber-300">max_suffix</code> — Largest sum ending at right of range</li>
+                                        <li><code class="text-amber-300">max_sub</code> — Best subarray inside the range</li>
+                                    </ul>
+                                    <p class="text-xs mt-3 text-slate-400">Merge: <code>max_sub = max(left.max_sub, right.max_sub, left.max_suffix + right.max_prefix)</code></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label class="task-row flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-s2">
+                            <input type="checkbox" class="task-checkbox" onchange="toggleTask('s2')">
+                            <span class="task-text font-bold text-slate-700 group-hover:text-amber-700">Understand industrial applications: HFT, genomics, network monitoring</span>
+                        </label>
+                    </div>
+                </section>
+
+                <br><br>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const tasksMap = {
+            't1': 1, 't2': 1, 't3': 1,        // Block 1: 3h
+            'v1': 1, 'v2': 1, 'v3': 1, 'v4': 1, // Block 2: 4h
+            'a1': 1.5, 'a2': 1.5, 'a3': 1,     // Block 3: 4h
+            's1': 1.5, 's2': 1.5                 // Block 4: 3h
+        };
+        const totalPlannedHours = 14;
+        let completedTasks = new Set();
+        let progressChart;
+
+        function initApp() {
+            initChart();
+            populateDryRunTable();
+            document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        function toggleTask(id) {
+            const row = document.getElementById(`task-${id}`);
+            if (completedTasks.has(id)) {
+                completedTasks.delete(id);
+                row.classList.remove('completed');
+            } else {
+                completedTasks.add(id);
+                row.classList.add('completed');
+            }
+            updateDashboard();
+        }
+
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+        }
+
+        function calculateProgress() {
+            let h = 0;
+            completedTasks.forEach(t => h += tasksMap[t]);
+            return Math.min(h, totalPlannedHours);
+        }
+
+        function updateDashboard() {
+            const done = calculateProgress();
+            const pct = Math.round((done / totalPlannedHours) * 100);
+            document.getElementById('hoursCompleted').innerHTML = `${done.toFixed(1)}<span class="text-lg text-slate-500 font-medium">h</span>`;
+            document.getElementById('percentText').innerText = `${pct}%`;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            if (progressChart) {
+                progressChart.data.datasets[0].data = [done, totalPlannedHours - done];
+                progressChart.update();
+            }
+        }
+
+        function populateDryRunTable() {
+            const A = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
+            const tbody = document.getElementById('dryRunTable');
+            let curr = A[0], best = A[0];
+            tbody.innerHTML = `<tr class="border-b bg-violet-50"><td class="p-2">0</td><td class="p-2 font-mono">${A[0]}</td><td class="p-2 font-mono font-bold">${curr}</td><td class="p-2 font-mono text-violet-700 font-bold">${best}</td></tr>`;
+            for (let i = 1; i < A.length; i++) {
+                curr = Math.max(A[i], curr + A[i]);
+                best = Math.max(best, curr);
+                tbody.innerHTML += `<tr class="border-b"><td class="p-2">${i}</td><td class="p-2 font-mono">${A[i]}</td><td class="p-2 font-mono">${curr}</td><td class="p-2 font-mono ${best === 6 && curr === best ? 'text-violet-700 font-bold' : ''}">${best}</td></tr>`;
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            progressChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, totalPlannedHours],
+                        backgroundColor: ['#7c3aed', '#f1f5f9'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '80%',
+                    plugins: { legend: { display: false } }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw: chart => {
+                        const { width, height, ctx } = chart; ctx.restore();
+                        const pct = Math.round((chart.data.datasets[0].data[0] / totalPlannedHours) * 100) || 0;
+                        ctx.font = "900 " + (height / 100).toFixed(2) + "em Inter, sans-serif";
+                        ctx.textBaseline = "middle"; ctx.fillStyle = "#1e293b";
+                        ctx.fillText(pct + "%", Math.round((width - ctx.measureText(pct + "%").width) / 2), height / 2.1);
+                        ctx.font = "bold " + (height / 250).toFixed(2) + "em Inter, sans-serif"; ctx.fillStyle = "#64748b";
+                        ctx.fillText("DONE", Math.round((width - ctx.measureText("DONE").width) / 2), height / 2.1 + height * 0.18);
+                        ctx.save();
+                    }
+                }]
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
