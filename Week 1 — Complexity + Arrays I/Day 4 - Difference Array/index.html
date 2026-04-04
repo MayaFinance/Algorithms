@@ -7,11 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; scroll-behavior: smooth; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; }
         .chart-container { position: relative; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto; height: 250px; max-height: 250px; }
         .task-checkbox { appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor; width: 1.5em; height: 1.5em; border: 2px solid #cbd5e1; border-radius: 0.25em; display: grid; place-content: center; cursor: pointer; transition: all 0.2s ease-in-out; }
         .task-checkbox::before { content: ""; width: 0.8em; height: 0.8em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; background-color: transform; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
-        .task-checkbox:checked { background-color: #f97316; border-color: #f97316; } /* Orange 500 */
+        .task-checkbox:checked { background-color: #f97316; border-color: #f97316; }
         .task-checkbox:checked::before { transform: scale(1); }
         .task-row { transition: all 0.3s ease; }
         .task-row.completed .task-text { color: #94a3b8; text-decoration: line-through; }
@@ -20,26 +20,22 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; }
-        th, td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #f8fafc; font-weight: 600; color: #475569; }
-        tr:hover { background-color: #f1f5f9; }
+        pre, code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
+        .math { font-family: 'Georgia', serif; font-style: italic; }
     </style>
 </head>
 <body class="antialiased min-h-screen pb-16 bg-slate-50">
 
-    <!-- Sticky Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">DAY 4</h1>
                 <p class="text-sm font-semibold text-slate-500 tracking-widest uppercase mt-1">Algorithm Bootcamp</p>
             </div>
-            <div class="sm:text-right bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
-                <div class="text-xl font-bold text-orange-600">Difference Arrays</div>
-                <div class="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                    <span class="text-base">⚡</span> Offline Range Updates
+            <div class="sm:text-right bg-orange-50 px-4 py-2 rounded-lg border border-orange-100">
+                <div class="text-xl font-bold text-orange-700">Difference Arrays</div>
+                <div class="text-xs font-bold text-rose-500 uppercase tracking-wide flex items-center gap-1">
+                    <span class="text-base">🚀</span> O(1) Range Updates
                 </div>
             </div>
         </div>
@@ -48,22 +44,21 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Sidebar: Dashboard Stats -->
             <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
-                <section class="bg-orange-600 text-white p-6 rounded-2xl shadow-lg">
+                <section class="bg-orange-600 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl"></div>
                     <h2 class="text-lg font-bold flex items-center gap-2 mb-2">
-                        <span class="text-2xl">⚡</span> The Core Goal
+                        <span class="text-2xl">🎯</span> The Core Goal
                     </h2>
-                    <p class="text-orange-50 text-base leading-relaxed mb-4">
-                        Master the <strong>Discrete Derivative</strong>. Shift heavy computational burdens from the inner update loops to a single sweeping reconstruction pass, replacing <i class="font-serif block text-center text-xl my-2 bg-orange-800 rounded font-bold shadow-inner">O(N) &rarr; O(1)</i>.
+                    <p class="text-orange-100 text-sm leading-relaxed mb-4">
+                        Shift the computational burden of batch range updates from <strong class="bg-orange-800 text-white px-1.5 py-0.5 rounded shadow-inner font-mono text-xs">O(N)</strong> to <strong class="bg-emerald-600 text-white px-1.5 py-0.5 rounded shadow-inner font-mono text-xs">O(1)</strong> mapping boundary deltas, culminating in a single reconstruction pass. Inverse of Prefix Sum!
                     </p>
                 </section>
 
-                <!-- Progress Tracker -->
                 <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <div class="mb-6">
                         <h3 class="text-lg font-bold text-slate-800 mb-1">Study Progress</h3>
-                        <p class="text-sm text-slate-500">Track your 14-hour Difference Array plan.</p>
+                        <p class="text-sm text-slate-500">Track your 25-hour exhaustive marathon.</p>
                     </div>
                     
                     <div class="chart-container mb-6">
@@ -73,10 +68,6 @@
                     <div class="grid grid-cols-2 gap-4 text-center">
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <div class="text-3xl font-extrabold text-slate-800" id="hoursCompleted">0<span class="text-lg text-slate-500 font-medium">h</span></div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Completed</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div class="text-3xl font-extrabold text-slate-800">14<span class="text-lg text-slate-500 font-medium">h</span></div>
                             <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Total Planned</div>
                         </div>
                     </div>
@@ -87,244 +78,386 @@
                             <span class="font-bold text-orange-600" id="percentText">0%</span>
                         </div>
                         <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner overflow-hidden">
-                            <div class="bg-orange-500 h-3 rounded-full transition-all duration-700 ease-out w-0 relative" id="progressBar"></div>
+                            <div class="bg-orange-500 h-3 rounded-full transition-all duration-700 ease-out w-0 relative overflow-hidden" id="progressBar"></div>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <!-- Main Content: Action Plan -->
-            <div class="lg:col-span-8 space-y-8" id="syllabusContainer">
+            <div class="lg:col-span-8 space-y-6" id="syllabusContainer">
                 
-                <div class="mb-2 flex items-end justify-between border-b border-slate-200 pb-2">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800">Knowledge Framework</h2>
-                        <p class="text-slate-600 mt-1">Extracted directly from the seminal Difference Array paper.</p>
-                    </div>
+                <div class="mb-2">
+                    <h2 class="text-2xl font-bold text-slate-800">Action Plan (Deep Theory & Code)</h2>
+                    <p class="text-slate-600 mt-1">Master cumulative modifications matrices and sweep-line basics.</p>
                 </div>
 
-                <!-- BLOCK 1: Mathematical Foundations -->
+                <!-- BLOCK 1 -->
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-slate-800"></div>
+                    <div class="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📐</span> Block 1 — Mathematical Foundations</h2>
-                        <span class="bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">⚡</span> Block 1 — 1D Mathematical Foundations</h2>
+                        <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 3 Hours</span>
                     </div>
                     
                     <div class="p-6 space-y-4">
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-m1">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('m1')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-slate-600">The Discrete Derivative</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">The conceptual origins lie in the discrete analog of the fundamental theorem of calculus. Difference array <code class="bg-slate-100 px-1 rounded text-orange-700 font-bold">D[i] = A[i] - A[i-1]</code> effectively captures the "delta" or relative change.</p>
-                            </div>
-                        </label>
-                        
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-m2">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('m2')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-slate-600">Prefix Sum Duality</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Just as continuous functions integrate, a discrete sequence reconstructs through prefix summation. <br> <code class="bg-slate-100 px-1 rounded text-slate-800 font-bold mt-2 inline-block">A[k] = &Sigma; D[i] <span>(for i=0 to k)</span></code></p>
-                            </div>
-                        </label>
+                        <div class="bg-orange-50 p-4 border-l-4 border-orange-500 rounded-r-lg mb-4 text-orange-900 text-sm">
+                            <strong>The Discrete Derivative:</strong> Just as a continuous function is reconstructed from its derivative via integration, a discrete sequence is reconstructed from its difference array via prefix summation.
+                        </div>
 
-                        <div class="mt-4 p-4 border rounded-xl bg-white shadow-sm overflow-x-auto">
-                            <h4 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-3">Computational Complexity Comparion</h4>
-                            <table class="w-full">
-                                <thead>
-                                    <tr>
-                                        <th>Operation Type</th>
-                                        <th>Naive Array</th>
-                                        <th class="bg-orange-50 text-orange-800">Difference Array</th>
-                                        <th>Segment Tree</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Range Update</strong></td>
-                                        <td>O(N)</td>
-                                        <td class="bg-orange-50 font-bold text-orange-700">O(1)</td>
-                                        <td>O(log N)</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Point Query</strong></td>
-                                        <td>O(1)</td>
-                                        <td class="bg-orange-50">O(N)</td>
-                                        <td>O(log N)</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Space</strong></td>
-                                        <td>O(N)</td>
-                                        <td class="bg-orange-50">O(N)</td>
-                                        <td>O(4N)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c1-1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c1-1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-orange-700 text-lg">Define Base Formula</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Understand the initialization and relation to Prefix Sums.</p>
+                                <button onclick="toggleAnswer('ans-c1-1')" class="reveal-btn text-xs bg-orange-100 text-orange-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-c1-1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm mb-2">The Difference array captures the "delta" or relative change at each index:</p>
+                                    <div class="bg-slate-900 border border-slate-700 p-3 rounded font-mono text-center text-orange-300 mb-2">
+                                        D[i] = A[i] - A[i-1]
+                                    </div>
+                                    <p class="text-sm text-slate-400">By definition, <code>A[k] = &Sigma; D[i]</code> (from i=0 to k). This duality makes range updates O(1). If we add `v` at `D[l]`, ALL elements from `l` onward will increase by `v` during the prefix sum pass!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c1-2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c1-2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-orange-700 text-lg">Range Addition Mechanics in O(1)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Adding +v to Range [L, R] using only 2 operations.</p>
+                                <button onclick="toggleAnswer('ans-c1-2')" class="reveal-btn text-xs bg-orange-100 text-orange-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                                <div id="ans-c1-2" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="text-xs font-mono text-orange-200 overflow-x-auto"><code>vector&lt;int&gt; getModifiedArray(int n, vector&lt;vector&lt;int&gt;&gt;& updates) {
+    // Crucial: Allocate size N + 1 to prevent Out-Of-Bounds on R + 1
+    vector&lt;int&gt; diff(n + 1, 0); 
+    
+    // 1. O(K) Batch Processing
+    for(auto& u : updates) {
+        int l = u[0], r = u[1], val = u[2];
+        diff[l] += val;             // Start increasing here
+        diff[r + 1] -= val;         // Stop increasing past this
+    }
+    
+    // 2. O(N) Reconstruction 
+    vector&lt;int&gt; res(n);
+    int current = 0;
+    for(int i = 0; i &lt; n; i++) {
+        current += diff[i];
+        res[i] = current;
+    }
+    return res;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- BLOCK 2 -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">💪</span> Block 2 — Real-World Problem Solving</h2>
+                        <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 4 Hours</span>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Corporate Flight Bookings (LeetCode 1109)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Converting 1-indexed problem domains to 0-indexed memory spaces.</p>
+                                <button onclick="toggleAnswer('ans-c2-1')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code implementation</button>
+                                <div id="ans-c2-1" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="text-xs font-mono text-rose-200 overflow-x-auto"><code>vector&lt;int&gt; corpFlightBookings(vector&lt;vector&lt;int&gt;&gt;& bookings, int n) {
+    // Array of size n+2 handles 1-based indexing offsets smoothly
+    vector&lt;int&gt; diff(n + 2, 0);
+    
+    for (auto& b : bookings) {
+        int first = b[0], last = b[1], seats = b[2];
+        diff[first] += seats;     // First mapped cleanly
+        diff[last + 1] -= seats;  // Drop safely into buffer
+    }
+    
+    vector&lt;int&gt; result(n);
+    int current_seats = 0;
+    for (int i = 1; i &lt;= n; i++) { // Reconstruct starting at 1
+        current_seats += diff[i];
+        result[i - 1] = current_seats; // Store correctly in 0-based result
+    }
+    return result;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Little Girl & Maximum Sum (CF 276C)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Advanced: Maximize sum of queries by rearranging initial elements.</p>
+                                <button onclick="toggleAnswer('ans-c2-2')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Greedy Insight</button>
+                                <div id="ans-c2-2" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs text-rose-300 mb-2"><strong>Core Idea:</strong> Identify which indices are queried the most. Place the largest numbers from the array into those high-frequency indices.</p>
+                                    <pre class="text-xs font-mono text-rose-200 overflow-x-auto"><code>long long maxSum(vector&lt;int&gt;& arr, vector&lt;pair&lt;int, int&gt;&gt;& queries) {
+    int n = arr.size();
+    vector&lt;int&gt; diff(n + 1, 0);
+    
+    // 1. Tally query frequencies using Difference Array
+    for(auto& q : queries) {
+        diff[q.first - 1]++;
+        diff[q.second]--;
+    }
+    
+    // 2. Reconstruct frequencies
+    vector&lt;int&gt; freq(n);
+    int curr = 0;
+    for(int i = 0; i &lt; n; i++) {
+        curr += diff[i];
+        freq[i] = curr;
+    }
+    
+    // 3. Sort both frequencies and array
+    sort(freq.begin(), freq.end());
+    sort(arr.begin(), arr.end());
+    
+    // 4. Dot Product (Greedy)
+    long long total = 0;
+    for(int i = 0; i &lt; n; i++) {
+        total += 1LL * freq[i] * arr[i];
+    }
+    return total;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Car Pooling (LeetCode 1094)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Standard 1D difference array simulation to track maximum capacity usage over time.</p>
+                                <button onclick="toggleAnswer('ans-c2-3')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code implementation</button>
+                                <div id="ans-c2-3" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="text-xs font-mono text-rose-200 overflow-x-auto"><code>bool carPooling(vector&lt;vector&lt;int&gt;&gt;& trips, int capacity) {
+    int maxLocation = 0;
+    for (auto& t : trips) maxLocation = max(maxLocation, t[2]);
+    vector&lt;int&gt; diff(maxLocation + 1, 0);
+    for (auto& t : trips) { diff[t[1]] += t[0]; diff[t[2]] -= t[0]; }
+    
+    int current_passengers = 0;
+    for (int i = 0; i &lt;= maxLocation; i++) {
+        current_passengers += diff[i];
+        if (current_passengers > capacity) return false;
+    }
+    return true;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-4">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-4')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">My Calendar II (LeetCode 731)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Use a TreeMap (`std::map` in C++) as a Difference Array to handle implicitly large coordinate spaces.</p>
+                                <button onclick="toggleAnswer('ans-c2-4')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code implementation</button>
+                                <div id="ans-c2-4" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="text-xs font-mono text-rose-200 overflow-x-auto"><code>class MyCalendarTwo {
+    map&lt;int, int&gt; diff;
+public:
+    bool book(int start, int end) {
+        diff[start]++;
+        diff[end]--;
+        int active = 0;
+        for (auto& [time, delta] : diff) {
+            active += delta;
+            if (active >= 3) {
+                diff[start]--; diff[end]++;
+                return false;
+            }
+        }
+        return true;
+    }
+};</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-5">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-5')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Describe the Painting (LeetCode 1943)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Sweep-line / Difference Array with mapping to handle intervals and merging properties (colors) on a number line.</p>
+                                <button onclick="toggleAnswer('ans-c2-5')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Code implementation</button>
+                                <div id="ans-c2-5" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="text-xs font-mono text-rose-200 overflow-x-auto"><code>vector&lt;vector&lt;long long&gt;&gt; splitPainting(vector&lt;vector&lt;int&gt;&gt;& segments) {
+    map&lt;int, long long&gt; diff;
+    for (auto& seg : segments) {
+        diff[seg[0]] += seg[2]; diff[seg[1]] -= seg[2];
+    }
+    vector&lt;vector&lt;long long&gt;&gt; res;
+    long long color_sum = 0;
+    int last_pos = -1;
+    for (auto& [pos, delta] : diff) {
+        if (color_sum > 0 && last_pos != -1) res.push_back({last_pos, pos, color_sum});
+        color_sum += delta;
+        last_pos = pos;
+    }
+    return res;
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-6">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-6')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Stamping the Grid (LeetCode 2132)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Mastering 2D Difference Arrays AND 2D Prefix Sums simultaneously.</p>
+                                <button onclick="toggleAnswer('ans-c2-6')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Pattern Insight</button>
+                                <div id="ans-c2-6" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs text-rose-300 mb-2"><strong>Core Idea:</strong> Use 2D Prefix sums to validate if a stamp can be placed cleanly, then use a 2D Difference Array to apply the stamp across regions to ensure all empty cells are hit. See <code>solutions.cpp</code> for the full 50-line C++ architecture.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c2-7">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c2-7')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Rectangle Area II (LeetCode 850)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">The Ultimate Boss. Combining Coordinate Compression, Sweep-Line algorithms, and Active Intervals to calculate 2D geometric unions.</p>
+                                <button onclick="toggleAnswer('ans-c2-7')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Pattern Insight</button>
+                                <div id="ans-c2-7" class="hidden mt-3 p-4 bg-slate-900 border border-slate-700 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs text-rose-300 mb-2"><strong>Core Idea:</strong> Compress the X-axis natively via sorting. Then, sweep completely down the Y-axis for each unique vertical X-slab, summing coverage. This simulates continuous difference updates against an event timeline. Deep C++ implementation available in <code>solutions.cpp</code>.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- BLOCK 2: 1D Mechanics -->
+                <!-- BLOCK 3 -->
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
+                    <div class="absolute top-0 left-0 w-2 h-full bg-violet-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">⚙️</span> Block 2 — 1D Implementation Mechanics</h2>
-                        <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🧊</span> Block 3 — 2D Scaling & Architectures</h2>
+                        <span class="bg-violet-100 text-violet-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 3 Hours</span>
                     </div>
-                    <div class="p-6 space-y-2">
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-p1">
-                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p1')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 group-hover:text-orange-600 block">Initialization & Sizing Strategy</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-1">While the original array is size N, a difference array is initialized to <strong>size N+1</strong> to act as a buffer for the <code>r+1</code> subtraction.</p>
-                            </div>
-                        </label>
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-p2">
-                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p2')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 group-hover:text-orange-600 block">Boundary Modification Logic</span>
-                                <div class="problem-desc text-sm text-slate-600 mt-2 bg-slate-800 p-3 rounded-lg font-mono text-emerald-400">
-                                    diff[l] += value; <br>
-                                    diff[r + 1] -= value;
+                    
+                    <div class="p-6 space-y-4">
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-c3-1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('c3-1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-violet-700 text-lg">2D Inclusion-Exclusion (4-Point Update)</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Using `diff[r][c] += v` logic scaling over submatrices.</p>
+                                <button onclick="toggleAnswer('ans-c3-1')" class="reveal-btn text-xs bg-violet-100 text-violet-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Formula</button>
+                                <div id="ans-c3-1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm mb-3">To add `v` into a rectangle from (r1, c1) to (r2, c2):</p>
+                                    <div class="bg-slate-900 border border-slate-700 p-3 rounded font-mono text-center text-violet-300 mb-2">
+                                        diff[r1][c1]     += v <br>
+                                        diff[r2+1][c1]   -= v <br>
+                                        diff[r1][c2+1]   -= v <br>
+                                        diff[r2+1][c2+1] += v
+                                    </div>
+                                    <hr class="border-slate-600 my-4">
+                                    <h5 class="font-bold text-emerald-400 mb-2">2D Reconstruction (Unified Pass)</h5>
+                                    <div class="bg-slate-900 border border-slate-700 p-3 rounded font-mono text-center text-violet-300 mb-2 text-xs">
+                                        P[i][j] = D[i][j] + P[i-1][j] + P[i][j-1] - P[i-1][j-1]
+                                    </div>
                                 </div>
                             </div>
-                        </label>
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-p3">
-                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p3')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 group-hover:text-orange-600 block">Prefix Sum Reconstruction Pass</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-1">A single linear pass inflates the boundary markers. <code>diff[i] += diff[i - 1]</code>.</p>
-                            </div>
-                        </label>
+                        </div>
+
                     </div>
                 </section>
 
-                <!-- BLOCK 3: Advanced Problems -->
-                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
-                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🏆</span> Block 3 — Advanced 1D Problem Solving</h2>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <label class="task-row flex items-start gap-4 p-3 border border-blue-100 bg-blue-50/30 hover:bg-blue-50 rounded-xl cursor-pointer group" id="task-c1">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('c1')">
-                            <div class="flex-1">
-                                <span class="task-text font-bold text-slate-800 text-lg block group-hover:text-blue-700">Case Study 1: Range Addition (LeetCode 370)</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">The prototypical offline application. Handles purely overlapping updates safely in O(1) per query regardless of overlaps.</p>
-                            </div>
-                        </label>
-
-                        <label class="task-row flex items-start gap-4 p-3 border border-blue-100 bg-blue-50/30 hover:bg-blue-50 rounded-xl cursor-pointer group" id="task-c2">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('c2')">
-                            <div class="flex-1">
-                                <span class="task-text font-bold text-slate-800 text-lg block group-hover:text-blue-700">Case Study 2: Corporate Flight Bookings</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2"><strong>Trap Warning:</strong> Focuses on mapping 1-indexed problem domains to 0-indexed memory. <code class="bg-white p-1 rounded font-mono border">first - 1</code> becomes the start marker, and <code class="bg-white p-1 rounded font-mono border">last</code> maps cleanly to the end marker without needing a +1.</p>
-                            </div>
-                        </label>
-
-                        <label class="task-row flex items-start gap-4 p-3 border border-blue-100 bg-blue-50/30 hover:bg-blue-50 rounded-xl cursor-pointer group" id="task-c3">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('c3')">
-                            <div class="flex-1">
-                                <span class="task-text font-bold text-slate-800 text-lg block group-hover:text-blue-700">Case Study 3: Little Girl & Max Sum (CF 276C)</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Difference Array combined with Greedy Optimization. <br> 1. Form a frequency Map of indices using the Difference array (+1 / -1).<br> 2. Calculate Prefix.<br> 3. Sort both frequencies and original values. Dot product for maximum.</p>
-                            </div>
-                        </label>
-                    </div>
-                </section>
-
-                <!-- BLOCK 4: 2D Spatial -->
+                <!-- BLOCK 4 -->
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🗺️</span> Block 4 — 2D Spatial Updates</h2>
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-d1">
-                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('d1')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 group-hover:text-emerald-700 block text-lg">Inclusion-Exclusion & 4-Point Logic</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2 mb-3">Updating submatrix (r1, c1) to (r2, c2) uses corners.</p>
-                                <div class="bg-slate-800 text-emerald-400 font-mono text-sm p-3 rounded-lg">
-                                    D[r1][c1]     += v <span class="text-slate-500">// Start Addition</span><br>
-                                    D[r1][c2+1]   -= v <span class="text-slate-500">// Cancel Right</span><br>
-                                    D[r2+1][c1]   -= v <span class="text-slate-500">// Cancel Below</span><br>
-                                    D[r2+1][c2+1] += v <span class="text-slate-500">// Restore Overlap</span>
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-d2">
-                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('d2')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 group-hover:text-emerald-700 block text-lg">Unified 2D Reconstruction Pass</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-1 mb-2">Can be done via sequential 1D passes (Row-wise then Col-wise), or using unified 2D Formula:</p>
-                                <code class="bg-emerald-50 border border-emerald-200 text-slate-800 px-3 py-2 rounded-lg block overflow-x-auto text-sm">
-                                    P[i][j] = D[i][j] + P[i-1][j] + P[i][j-1] - P[i-1][j-1]
-                                </code>
-                            </div>
-                        </label>
-                    </div>
-                </section>
-
-                <!-- BLOCK 5: Architecture Optimization -->
-                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-violet-600"></div>
-                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🛡️</span> Block 5 — Engineering & Optimizations</h2>
-                        <span class="bg-violet-100 text-violet-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 2 Hours</span>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">⚡</span> Block 4 — Data Structure Comparisons & Tuning</h2>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">⏱️ 4 Hours</span>
                     </div>
                     
                     <div class="p-6">
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <label class="task-row flex items-start gap-4 border border-violet-100 bg-violet-50/30 p-4 rounded-xl cursor-pointer group" id="task-e1">
-                                <input type="checkbox" class="task-checkbox shrink-0 mt-0.5" onchange="toggleTask('e1')">
-                                <div>
-                                    <span class="task-text font-bold text-slate-800 text-base mb-2 block group-hover:text-violet-700">Coordinate Compression</span>
-                                    <p class="problem-desc text-xs text-slate-600">If space bounds are 10<sup>9</sup> but updates are 10<sup>5</sup>, compress bounds into relative index steps to prevent Out-Of-Memory errors.</p>
+                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group mb-1" id="task-c4-1">
+                            <input type="checkbox" class="task-checkbox mt-1 border-slate-400" onchange="toggleTask('c4-1')">
+                            <div class="flex-1">
+                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-emerald-700">Comparative Analysis</span>
+                                <div class="mt-3 overflow-x-auto border border-slate-200 rounded text-sm text-slate-700 bg-white">
+                                    <table class="min-w-full text-left">
+                                        <thead class="bg-slate-100 text-slate-600">
+                                            <tr><th class="p-2 border-b">Structure</th><th class="p-2 border-b">Update</th><th class="p-2 border-b">Query</th><th class="p-2 border-b">Best For</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b"><td class="p-2 font-semibold">Difference Array</td><td class="p-2 font-mono">O(1)</td><td class="p-2 font-mono">O(N)</td><td class="p-2 text-xs">Offline Batch Additions</td></tr>
+                                            <tr class="border-b"><td class="p-2 font-semibold">BIT (1 Level)</td><td class="p-2 font-mono">O(log N)</td><td class="p-2 font-mono">O(log N)</td><td class="p-2 text-xs">Prefix Sums / Point Updates</td></tr>
+                                            <tr class="border-b"><td class="p-2 font-semibold bg-emerald-50">Two-BIT Approach</td><td class="p-2 font-mono bg-emerald-50">O(log N)</td><td class="p-2 font-mono bg-emerald-50">O(log N)</td><td class="p-2 text-xs bg-emerald-50">Online Interleaved Add/Sum</td></tr>
+                                            <tr class="border-b"><td class="p-2 font-semibold">Segment Tree</td><td class="p-2 font-mono">O(log N)</td><td class="p-2 font-mono">O(log N)</td><td class="p-2 text-xs">RMQ / Complex Lazy Prop</td></tr>
+                                            <tr><td class="p-2 font-semibold">Sqrt Decomp</td><td class="p-2 font-mono">O(&radic;N)</td><td class="p-2 font-mono">O(&radic;N)</td><td class="p-2 text-xs">Complex ops, no tree rules</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </label>
+
+                        <div class="bg-slate-800 rounded-xl p-5 shadow-inner mt-6">
+                            <h4 class="font-bold text-white mb-3 text-lg">Deep Mechanics</h4>
+                            
+                            <label class="task-row flex items-start gap-4 p-2 cursor-pointer group" id="task-c4-2">
+                                <input type="checkbox" class="task-checkbox mt-1 border-slate-500 bg-slate-700 checked:bg-emerald-500" onchange="toggleTask('c4-2')">
+                                <div class="flex-1">
+                                    <span class="task-text font-medium text-slate-200">Coordinate Compression Memory Mapping</span>
+                                    <p class="text-xs text-slate-400 mt-1">When coordinates reach 10<sup>9</sup>, allocate memory only for unique bounds. Map large coordinates to a compressed index [0, 2Q] in `O(Q log Q)`. Array drops from `10^9` to max `O(2*Updates)`.</p>
                                 </div>
                             </label>
                             
-                            <label class="task-row flex items-start gap-4 border border-violet-100 bg-violet-50/30 p-4 rounded-xl cursor-pointer group" id="task-e2">
-                                <input type="checkbox" class="task-checkbox shrink-0 mt-0.5" onchange="toggleTask('e2')">
-                                <div>
-                                    <span class="task-text font-bold text-slate-800 text-base mb-2 block group-hover:text-violet-700">Online Range Updates (2-BIT)</span>
-                                    <p class="problem-desc text-xs text-slate-600">Difference arrays are strictly offline. To interleave updates and queries natively in <i class="font-serif">O(log N)</i>, implement twin Fenwick Trees (BITs).</p>
+                            <label class="task-row flex items-start gap-4 p-2 cursor-pointer group mt-2" id="task-c4-3">
+                                <input type="checkbox" class="task-checkbox mt-1 border-slate-500 bg-slate-700 checked:bg-emerald-500" onchange="toggleTask('c4-3')">
+                                <div class="flex-1">
+                                    <span class="task-text font-medium text-slate-200">The Power of Two-BIT</span>
+                                    <p class="text-xs text-slate-400 mt-1">If queries and updates happen randomly, standard diff arrays fail due to O(N) queries. By maintaining one BIT for `D[i]` and a second BIT for `(i-1)*D[i]`, we can compute Prefix-Sums directly in O(log N)!</p>
                                 </div>
                             </label>
                         </div>
-
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-e3">
-                            <input type="checkbox" class="task-checkbox shrink-0 mt-0.5" onchange="toggleTask('e3')">
-                            <div>
-                                <span class="task-text font-bold text-slate-800 text-base mb-2 block group-hover:text-violet-700">Audit Safety Checklist</span>
-                                <ul class="list-none problem-desc text-sm text-slate-600 space-y-2 mt-2 font-mono bg-slate-100 p-4 rounded-lg">
-                                    <li>&bull; <strong class="text-rose-600">64-Bit Integers:</strong> Prefix additions often overflow 32-bit limits. Use long long.</li>
-                                    <li>&bull; <strong class="text-blue-600">Cache Friendly:</strong> Sequential scans are fast. 2D reconstructions should strictly use Row-Major order.</li>
-                                    <li>&bull; <strong class="text-emerald-600">In-Place Mutation:</strong> Diff pass and Prefix pass can share the same memory pointer to save space.</li>
-                                </ul>
-                            </div>
-                        </label>
-                        
                     </div>
                 </section>
-
+                
+                <br><br>
             </div>
         </div>
     </main>
 
     <script>
         const tasksMap = {
-            'm1': 1, 'm2': 2,                             // Block 1 (3 hrs)
-            'p1': 1, 'p2': 1, 'p3': 1,                    // Block 2 (3 hrs)
-            'c1': 1, 'c2': 1, 'c3': 1,                    // Block 3 (3 hrs)
-            'd1': 1.5, 'd2': 1.5,                         // Block 4 (3 hrs)
-            'e1': 0.75, 'e2': 0.75, 'e3': 0.5             // Block 5 (2 hrs)
+            'c1-1': 1.5, 'c1-2': 1.5,
+            'c2-1': 2, 'c2-2': 2, 'c2-3': 1.5, 'c2-4': 2, 'c2-5': 2, 'c2-6': 2.5, 'c2-7': 3,
+            'c3-1': 3,
+            'c4-1': 1.5, 'c4-2': 1.5, 'c4-3': 1
         };
-        const totalPlannedHours = 14;
+        const totalPlannedHours = 25;
         let completedTasks = new Set();
         let progressChart;
 
@@ -345,6 +478,15 @@
             updateDashboard();
         }
 
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if(el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
         function calculateProgress() {
             let hours = 0;
             completedTasks.forEach(t => hours += tasksMap[t]);
@@ -362,7 +504,7 @@
             
             if(progressChart) {
                 progressChart.data.datasets[0].data = [completedHours, remainingHours];
-                progressChart.data.datasets[0].backgroundColor = percentage >= 99 ? ['#22c55e', '#f1f5f9'] : ['#f97316', '#f1f5f9'];
+                progressChart.data.datasets[0].backgroundColor = percentage >= 99 ? ['#ea580c', '#f1f5f9'] : ['#f97316', '#f1f5f9'];
                 progressChart.update();
             }
         }
@@ -376,19 +518,13 @@
                     labels: ['Completed Time', 'Remaining Time'],
                     datasets: [{
                         data: [0, totalPlannedHours],
-                        backgroundColor: ['#f97316', '#f1f5f9'], /* Orange 500 */
+                        backgroundColor: ['#f97316', '#f1f5f9'],
                         borderWidth: 0, hoverOffset: 4
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '80%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
-                            callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)} hrs` }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     animation: { animateScale: true, animateRotate: true }
                 },
                 plugins: [{

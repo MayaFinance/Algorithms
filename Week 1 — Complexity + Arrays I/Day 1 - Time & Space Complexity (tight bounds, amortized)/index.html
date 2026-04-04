@@ -21,8 +21,8 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        pre { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
-        code { font-family: inherit; }
+        pre, code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
+        .reveal-btn { transition: background-color 0.2s; }
     </style>
 </head>
 <body class="antialiased min-h-screen pb-16 bg-slate-50">
@@ -91,59 +91,79 @@
             <div class="lg:col-span-8 space-y-8" id="syllabusContainer">
                 
                 <div class="mb-2">
-                    <h2 class="text-2xl font-bold text-slate-800">Action Plan</h2>
-                    <p class="text-slate-600 mt-1">Follow the blocks sequentially. Document edge cases.</p>
+                    <h2 class="text-2xl font-bold text-slate-800">Action Plan (Deep Theory)</h2>
+                    <p class="text-slate-600 mt-1">Rigorous proofs and practical implementation strategies.</p>
                 </div>
 
                 <!-- BLOCK 1: THEORY -->
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📚</span> Block 1 — Theory</h2>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📚</span> Block 1 — Formal Definitions</h2>
                         <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
                     </div>
                     
                     <div class="p-6 space-y-4">
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t1">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('t1')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-indigo-700">Asymptotic Notations</span>
-                                <div class="bg-slate-100 border border-slate-200 p-4 rounded-lg mt-3 text-sm shadow-inner grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Asymptotic Notations</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <div class="bg-slate-100 border border-slate-200 p-4 rounded-lg mt-3 text-sm shadow-inner grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                                     <div><strong class="text-slate-800 block mb-1">Big O (Upper)</strong><code class="text-red-700 text-xs bg-white px-1 rounded">O(N) &le; c&middot;g(N)</code></div>
                                     <div><strong class="text-slate-800 block mb-1">Big &Omega; (Lower)</strong><code class="text-blue-700 text-xs bg-white px-1 rounded">&Omega;(N) &ge; c&middot;g(N)</code></div>
                                     <div><strong class="text-slate-800 block mb-1">Big &Theta; (Tight)</strong><code class="text-emerald-700 text-xs bg-white px-1 rounded">Strictly Linear</code></div>
                                 </div>
-                            </div>
-                        </label>
-
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t2">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('t2')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-indigo-700">Growth Hierarchy</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Memorize the 1-second operational limit in C++ (~10<sup>8</sup> operations).</p>
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    <span class="bg-white border border-slate-200 text-xs font-mono px-2 py-1 rounded text-slate-600">N=10<sup>18</sup> &rarr; O(log N)</span>
-                                    <span class="bg-white border border-slate-200 text-xs font-mono px-2 py-1 rounded text-slate-600">N=10<sup>5</sup> &rarr; O(N log N)</span>
-                                    <span class="bg-white border border-slate-200 text-xs font-mono px-2 py-1 rounded text-slate-600">N=5000 &rarr; O(N<sup>2</sup>)</span>
+                                <button onclick="toggleAnswer('ans-t1')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Formal Mathematical Proofs</button>
+                                <div id="ans-t1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm mb-3">In mathematical terms, <code>f(n) = O(g(n))</code> means there exist positive constants <code>c</code> and <code>n0</code> such that <code>0 &le; f(n) &le; c&middot;g(n)</code> for all <code>n &ge; n0</code>.</p>
+                                    <div class="border-l-2 border-indigo-500 pl-3">
+                                        <p class="text-xs mb-2"><strong>Why drop constants?</strong> Because as N scales toward infinity, the dominant term dictates behavior. <code>5N^2 + 100N + 5000</code> is strictly bounded by <code>c&middot;N^2</code> for some massive <code>c</code>. The lower order terms become statistically irrelevant to CPU cycle accumulation.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </label>
+                        </div>
 
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t3">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('t3')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-indigo-700">Amortized Complexity</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Even if a single operation is expensive (like <code>vector</code> resizing), the average cost over a sequence is low.</p>
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Growth Hierarchy & Constraint Mapping</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Reverse engineer the solution purely from LeetCode input limits.</p>
+                                <button onclick="toggleAnswer('ans-t2')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Limit Table</button>
+                                <div id="ans-t2" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs mb-2 text-indigo-200">The "1-Second Rule" in C/C++ implies modern CPUs handle approx <strong>10<sup>8</sup> operations per second.</strong></p>
+                                    <ul class="text-xs font-mono space-y-2 mt-3 bg-slate-900 p-3 rounded border border-slate-700">
+                                        <li>N &le; 10 &rarr; O(N!) [Permutations]</li>
+                                        <li>N &le; 20 &rarr; O(2<sup>N</sup>) [Subsets]</li>
+                                        <li>N &le; 500 &rarr; O(N<sup>3</sup>) [Floyd-Warshall]</li>
+                                        <li>N &le; 5000 &rarr; O(N<sup>2</sup>) [Nested Loops]</li>
+                                        <li>N &le; 10<sup>5</sup> &rarr; O(N log N) [Sorting, Binary Search]</li>
+                                        <li>N &le; 10<sup>8</sup> &rarr; O(N) [Linear Scan]</li>
+                                        <li>N &ge; 10<sup>9</sup> &rarr; O(log N) or O(1) [Math, Binary Search on Answer]</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </label>
+                        </div>
 
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t4">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('t4')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-indigo-700">Loop Patterns</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Nested loops: <i class="font-serif">O(N<sup>2</sup>)</i>. Logarithmic steps: <i class="font-serif">O(log N)</i>.</p>
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Amortized Complexity</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Analyzing worst-case sequences instead of isolated events.</p>
+                                <button onclick="toggleAnswer('ans-t3')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Potential Method</button>
+                                <div id="ans-t3" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm border-l-2 border-indigo-400 pl-3 mb-3">Amortization guarantees the average performance of each operation in the worst case.</p>
+                                    <p class="text-xs"><strong>The Dynamic Array Proof:</strong> When a vector resizes, it doubles. The cost of N insertions is:<br><br>
+                                    <code class="text-rose-400">1 + 2 + 4 + 8 + ... + N = 2N</code><br><br>
+                                    Even though resizing is O(N), across N elements, the cost is <code>2N / N = 2</code> operations. Therefore, strictly amortized <strong>O(1)</strong>.</p>
+                                </div>
                             </div>
-                        </label>
+                        </div>
                     </div>
                 </section>
 
@@ -151,7 +171,7 @@
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🛠️</span> Block 2 — Practice (40 Snippets)</h2>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🛠️</span> Block 2 — 40 Snippet Benchmark Marathon</h2>
                         <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 4 Hours</span>
                     </div>
                     <div class="p-6 space-y-4">
@@ -185,30 +205,39 @@
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔥</span> Block 3 — Harder Analysis</h2>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔥</span> Block 3 — Advanced Master Theorem Convergence</h2>
                         <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 4 Hours</span>
                     </div>
                     <div class="p-6 space-y-4">
                         
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h1">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('h1')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-rose-700">Harmonic Complexity</span>
-                                <div class="bg-slate-800 text-slate-300 p-3 rounded-lg mt-2 font-mono text-xs shadow-inner">
-                                    for(i=1..n) { for(j=1..n; j+=i) { ... } } <br> -> O(N log N)
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('h1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Harmonic Series Analysis</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-h1')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-h1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="bg-slate-900 p-2 rounded text-xs text-rose-300 border border-slate-700 mb-2"><code>for(int i=1; i<=N; i++) {
+    for(int j=i; j<=N; j+=i) { ... }
+}</code></pre>
+                                    <p class="text-xs">The inner loop runs `N/1 + N/2 + N/3 + ... + N/N` times.<br>This factors to `N * (1 + 1/2 + 1/3 + ... + 1/N)`.<br>The sum of the harmonic series converges bounded by `ln(N)`. Therefore, this is precisely <strong>O(N log N)</strong>. Highly common in number theory (Sieve of Eratosthenes).</p>
                                 </div>
                             </div>
-                        </label>
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h2">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('h2')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-rose-700">Logarithmic Nested & Square Roots</span>
-                                <div class="bg-slate-800 text-slate-300 p-3 rounded-lg mt-2 font-mono text-xs shadow-inner">
-                                    Geometric series bounds: O(N).<br>
-                                    i*i <= n bounds: O(&radic;N).
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('h2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Recursive Branching</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-h2')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-h2" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs border-l-2 border-rose-500 pl-3">If a function calls itself twice: `T(N) = 2*T(N-1)`, it produces a binary tree of height N. The number of leaves is `2^N`. The time complexity is <strong>O(2^N)</strong>.</p>
                                 </div>
                             </div>
-                        </label>
+                        </div>
                         
                         <div class="mt-8 border-t border-slate-100 pt-6">
                             <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group mb-4" id="task-h3">
@@ -227,20 +256,12 @@
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">💻</span> Block 4 — Implement & Experiment</h2>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">💻</span> Block 4 — The Interactive Chart</h2>
                         <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
                     </div>
                     
                     <div class="p-6">
-                        <label class="task-row flex items-start gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer group mb-4" id="task-b1">
-                            <input type="checkbox" class="task-checkbox mt-1" onchange="toggleTask('b1')">
-                            <div class="flex-1">
-                                <span class="task-text font-semibold text-slate-800 text-lg block group-hover:text-emerald-700">Write CP Benchmark Template</span>
-                                <p class="problem-desc text-sm text-slate-600 mt-2">Use <code>chrono</code> and <code>ios::sync_with_stdio(false)</code> in C++.</p>
-                            </div>
-                        </label>
-
-                        <div class="bg-slate-800 p-6 rounded-xl shadow-inner mt-6 text-white mb-6">
+                        <div class="bg-slate-800 p-6 rounded-xl shadow-inner mt-2 text-white mb-6">
                             <div class="flex items-center gap-3 mb-4">
                                 <span class="text-xl">📈</span>
                                 <h4 class="font-bold">Visual Intuition Viewer</h4>
@@ -266,18 +287,17 @@
 
                     </div>
                 </section>
-
+                <br><br>
             </div>
         </div>
     </main>
 
     <script>
-        // Tasks Time Mapping
         const tasksMap = {
-            't1': 0.75, 't2': 0.75, 't3': 0.75, 't4': 0.75, // Theory: 3 hours
-            'p1': 1, 'p2': 1, 'p3': 1, 'p4': 1,             // Practice: 4 hours
-            'h1': 1.5, 'h2': 1.5, 'h3': 1,                  // Harder Analysis: 4 hours
-            'b1': 1.5, 'b2': 1.5                            // Benchmarks: 3 hours
+            't1': 1, 't2': 1, 't3': 1, // Theory: 3 hours
+            'p1': 1, 'p2': 1, 'p3': 1, 'p4': 1, // Practice: 4 hours
+            'h1': 1.5, 'h2': 1.5, 'h3': 1, // Harder Analysis: 4 hours
+            'b2': 3 // Benchmarks: 3 hours
         };
         const totalPlannedHours = 14;
         let completedTasks = new Set();
@@ -326,7 +346,6 @@
             }
         }
 
-        // ---------- Snippet & Recurrence Data Injection ----------
         function toggleAnswer(id) {
             const el = document.getElementById(id);
             if(el.classList.contains('hidden')) {
@@ -347,7 +366,7 @@
                 { code: "for(int i=n; i>1; i/=2) {\n    a++;\n}", desc: "n is halved every step. Takes log2(n) steps.", ans: "O(log n)" },
                 { code: "for(int i=1; i<n; i*=3) {\n    a++;\n}", desc: "Multiplies by 3. Base of log doesn't matter in Big O.", ans: "O(log n)" },
                 { code: "int i = n;\nwhile(i > 0) {\n    i = i / 10;\n}", desc: "Digit extraction loop. Runs log10(n) times.", ans: "O(log n)" },
-                { code: "for(int i=2; i<n; i=i*i) {\n    a++;\n}", desc: "i goes 2, 4, 16, 256. This is O(log(log n)). Very rare, but good to know.", ans: "O(log log n)" },
+                { code: "for(int i=2; i<n; i=i*i) {\n    a++;\n}", desc: "i goes 2, 4, 16, 256. This is O(log(log n)).", ans: "O(log log n)" },
                 { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<n; j++) {\n    a++;\n  }\n}", desc: "Standard nested loops. n * n operations.", ans: "O(n²)" },
                 { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<m; j++) {\n    a++;\n  }\n}", desc: "Dependent on two variables. Cannot simplify to n² if n != m.", ans: "O(n * m)" },
                 { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<n; j++) {\n    for(int k=0; k<n; k++) {\n      a++;\n    }\n  }\n}", desc: "Triple nested loop.", ans: "O(n³)" },
@@ -389,10 +408,10 @@
                         <pre><code>${item.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
                     </div>
                     <div class="p-3 bg-slate-50 border-t border-slate-200">
-                        <button onclick="toggleAnswer('ans-${index}')" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors w-full text-left flex justify-between items-center">
+                        <button onclick="toggleAnswer('ans-${index + 10}')" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors w-full text-left flex justify-between items-center">
                             Problem ${index + 1} <span class="text-xs bg-blue-100 px-2 py-1 rounded text-blue-800">Reveal</span>
                         </button>
-                        <div id="ans-${index}" class="hidden mt-3 pt-3 border-t border-slate-200">
+                        <div id="ans-${index + 10}" class="hidden mt-3 pt-3 border-t border-slate-200">
                             <p class="text-[11px] text-slate-500 mb-2">${item.desc}</p>
                             <p class="text-sm font-bold text-emerald-600 font-mono">${item.ans}</p>
                         </div>
@@ -447,13 +466,7 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '80%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
-                            callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)} hrs` }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     animation: { animateScale: true, animateRotate: true }
                 },
                 plugins: [{
@@ -490,9 +503,7 @@
                         x: { title: { display: true, text: 'Input Size (N)' } },
                         y: { type: 'logarithmic', title: { display: true, text: 'Operations' }, min: 1 }
                     },
-                    plugins: {
-                        tooltip: { mode: 'index', intersect: false }
-                    }
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
                 }
             });
             updateLineChart();
