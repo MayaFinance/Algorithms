@@ -1,3 +1,8 @@
+# Compiled binaries
+test_solutions
+a.out
+*.o
+
 # macOS system files
 .DS_Store
 .AppleDouble
