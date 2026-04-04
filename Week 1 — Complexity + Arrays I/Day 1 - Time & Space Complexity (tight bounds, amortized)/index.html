@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1: Time & Space Complexity Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container-donut { position: relative; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto; height: 250px; max-height: 250px; }
+        .chart-container-line { position: relative; width: 100%; height: 350px; }
+        .task-checkbox { appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor; width: 1.5em; height: 1.5em; border: 2px solid #cbd5e1; border-radius: 0.25em; display: grid; place-content: center; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .task-checkbox::before { content: ""; width: 0.8em; height: 0.8em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; background-color: transform; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+        .task-checkbox:checked { background-color: #3b82f6; border-color: #3b82f6; } /* Blue 500 */
+        .task-checkbox:checked::before { transform: scale(1); }
+        .task-row { transition: all 0.3s ease; }
+        .task-row.completed .task-text { color: #94a3b8; text-decoration: line-through; }
+        .task-row.completed .problem-desc { opacity: 0.5; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        pre, code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace; }
+        .reveal-btn { transition: background-color 0.2s; }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-16 bg-slate-50">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">DAY 1</h1>
+                <p class="text-sm font-semibold text-slate-500 tracking-widest uppercase mt-1">Algorithm Bootcamp</p>
+            </div>
+            <div class="sm:text-right bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
+                <div class="text-xl font-bold text-blue-600">Complexity Mastery</div>
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
+                    <span class="text-base">⏳</span> Absolute Foundations
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+                <section class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-lg font-bold flex items-center gap-2 mb-2">
+                        <span class="text-2xl">🎯</span> The Core Goal
+                    </h2>
+                    <p class="text-blue-50 text-lg leading-relaxed mb-4">
+                        Build theoretical intuition to reverse-engineer solutions from constraints. Predict how an algorithm behaves as <strong class="bg-blue-800 text-white px-2 py-0.5 rounded font-mono shadow-inner text-base">N &rarr; &infin;</strong>.
+                    </p>
+                </section>
+
+                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">Study Progress</h3>
+                        <p class="text-sm text-slate-500">Track your 14-hour mastery plan.</p>
+                    </div>
+                    
+                    <div class="chart-container-donut mb-6">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div class="text-3xl font-extrabold text-slate-800" id="hoursCompleted">0<span class="text-lg text-slate-500 font-medium">h</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Completed</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div class="text-3xl font-extrabold text-slate-800">14<span class="text-lg text-slate-500 font-medium">h</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Total Planned</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-bold text-slate-700">Completion</span>
+                            <span class="font-bold text-blue-600" id="percentText">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner overflow-hidden">
+                            <div class="bg-blue-500 h-3 rounded-full transition-all duration-700 ease-out w-0 relative" id="progressBar"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="lg:col-span-8 space-y-8" id="syllabusContainer">
+                
+                <div class="mb-2">
+                    <h2 class="text-2xl font-bold text-slate-800">Action Plan (Deep Theory)</h2>
+                    <p class="text-slate-600 mt-1">Rigorous proofs and practical implementation strategies.</p>
+                </div>
+
+                <!-- BLOCK 1: THEORY -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📚</span> Block 1 — Formal Definitions</h2>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Asymptotic Notations</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <div class="bg-slate-100 border border-slate-200 p-4 rounded-lg mt-3 text-sm shadow-inner grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                                    <div><strong class="text-slate-800 block mb-1">Big O (Upper)</strong><code class="text-red-700 text-xs bg-white px-1 rounded">O(N) &le; c&middot;g(N)</code></div>
+                                    <div><strong class="text-slate-800 block mb-1">Big &Omega; (Lower)</strong><code class="text-blue-700 text-xs bg-white px-1 rounded">&Omega;(N) &ge; c&middot;g(N)</code></div>
+                                    <div><strong class="text-slate-800 block mb-1">Big &Theta; (Tight)</strong><code class="text-emerald-700 text-xs bg-white px-1 rounded">Strictly Linear</code></div>
+                                </div>
+                                <button onclick="toggleAnswer('ans-t1')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Formal Mathematical Proofs</button>
+                                <div id="ans-t1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm mb-3">In mathematical terms, <code>f(n) = O(g(n))</code> means there exist positive constants <code>c</code> and <code>n0</code> such that <code>0 &le; f(n) &le; c&middot;g(n)</code> for all <code>n &ge; n0</code>.</p>
+                                    <div class="border-l-2 border-indigo-500 pl-3">
+                                        <p class="text-xs mb-2"><strong>Why drop constants?</strong> Because as N scales toward infinity, the dominant term dictates behavior. <code>5N^2 + 100N + 5000</code> is strictly bounded by <code>c&middot;N^2</code> for some massive <code>c</code>. The lower order terms become statistically irrelevant to CPU cycle accumulation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Growth Hierarchy & Constraint Mapping</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Reverse engineer the solution purely from LeetCode input limits.</p>
+                                <button onclick="toggleAnswer('ans-t2')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Limit Table</button>
+                                <div id="ans-t2" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs mb-2 text-indigo-200">The "1-Second Rule" in C/C++ implies modern CPUs handle approx <strong>10<sup>8</sup> operations per second.</strong></p>
+                                    <ul class="text-xs font-mono space-y-2 mt-3 bg-slate-900 p-3 rounded border border-slate-700">
+                                        <li>N &le; 10 &rarr; O(N!) [Permutations]</li>
+                                        <li>N &le; 20 &rarr; O(2<sup>N</sup>) [Subsets]</li>
+                                        <li>N &le; 500 &rarr; O(N<sup>3</sup>) [Floyd-Warshall]</li>
+                                        <li>N &le; 5000 &rarr; O(N<sup>2</sup>) [Nested Loops]</li>
+                                        <li>N &le; 10<sup>5</sup> &rarr; O(N log N) [Sorting, Binary Search]</li>
+                                        <li>N &le; 10<sup>8</sup> &rarr; O(N) [Linear Scan]</li>
+                                        <li>N &ge; 10<sup>9</sup> &rarr; O(log N) or O(1) [Math, Binary Search on Answer]</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-t3">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-indigo-700 text-lg">Amortized Complexity</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <p class="problem-desc text-sm text-slate-600 mb-2">Analyzing worst-case sequences instead of isolated events.</p>
+                                <button onclick="toggleAnswer('ans-t3')" class="reveal-btn text-xs bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Potential Method</button>
+                                <div id="ans-t3" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-sm border-l-2 border-indigo-400 pl-3 mb-3">Amortization guarantees the average performance of each operation in the worst case.</p>
+                                    <p class="text-xs"><strong>The Dynamic Array Proof:</strong> When a vector resizes, it doubles. The cost of N insertions is:<br><br>
+                                    <code class="text-rose-400">1 + 2 + 4 + 8 + ... + N = 2N</code><br><br>
+                                    Even though resizing is O(N), across N elements, the cost is <code>2N / N = 2</code> operations. Therefore, strictly amortized <strong>O(1)</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 2: PRACTICE -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🛠️</span> Block 2 — 40 Snippet Benchmark Marathon</h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 4 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-100 pb-6">
+                            <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group" id="task-p1">
+                                <input type="checkbox" class="task-checkbox" onchange="toggleTask('p1')">
+                                <span class="task-text font-bold text-slate-700 group-hover:text-blue-700">Master Level 1-10</span>
+                            </label>
+                            <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group" id="task-p2">
+                                <input type="checkbox" class="task-checkbox" onchange="toggleTask('p2')">
+                                <span class="task-text font-bold text-slate-700 group-hover:text-blue-700">Master Level 11-20</span>
+                            </label>
+                            <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group" id="task-p3">
+                                <input type="checkbox" class="task-checkbox" onchange="toggleTask('p3')">
+                                <span class="task-text font-bold text-slate-700 group-hover:text-blue-700">Master Level 21-30</span>
+                            </label>
+                            <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group" id="task-p4">
+                                <input type="checkbox" class="task-checkbox" onchange="toggleTask('p4')">
+                                <span class="task-text font-bold text-slate-700 group-hover:text-blue-700">Master Level 31-40</span>
+                            </label>
+                        </div>
+                        
+                        <p class="text-sm text-slate-500 mb-4 font-semibold">Snippets Grid (Predict the Big O for each):</p>
+                        <div id="snippet-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto custom-scrollbar p-2 border border-slate-100 rounded-xl bg-slate-50">
+                            <!-- Snippets injected by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 3: HARDER ANALYSIS -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔥</span> Block 3 — Advanced Master Theorem Convergence</h2>
+                        <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 4 Hours</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h1">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('h1')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Harmonic Series Analysis</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-h1')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-h1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <pre class="bg-slate-900 p-2 rounded text-xs text-rose-300 border border-slate-700 mb-2"><code>for(int i=1; i<=N; i++) {
+    for(int j=i; j<=N; j+=i) { ... }
+}</code></pre>
+                                    <p class="text-xs">The inner loop runs `N/1 + N/2 + N/3 + ... + N/N` times.<br>This factors to `N * (1 + 1/2 + 1/3 + ... + 1/N)`.<br>The sum of the harmonic series converges bounded by `ln(N)`. Therefore, this is precisely <strong>O(N log N)</strong>. Highly common in number theory (Sieve of Eratosthenes).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-row p-3 hover:bg-slate-50 rounded-xl cursor-pointer group" id="task-h2">
+                            <label class="flex items-start gap-4 cursor-pointer">
+                                <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('h2')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Recursive Branching</span>
+                            </label>
+                            <div class="ml-10 mt-2">
+                                <button onclick="toggleAnswer('ans-h2')" class="reveal-btn text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Theory</button>
+                                <div id="ans-h2" class="hidden mt-3 p-4 bg-slate-800 rounded-xl shadow-inner text-slate-300">
+                                    <p class="text-xs border-l-2 border-rose-500 pl-3">If a function calls itself twice: `T(N) = 2*T(N-1)`, it produces a binary tree of height N. The number of leaves is `2^N`. The time complexity is <strong>O(2^N)</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 border-t border-slate-100 pt-6">
+                            <label class="task-row flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer group mb-4" id="task-h3">
+                                <input type="checkbox" class="task-checkbox" onchange="toggleTask('h3')">
+                                <span class="task-text font-bold text-slate-800 group-hover:text-rose-700 text-lg">Master 10 Recurrences</span>
+                            </label>
+                            
+                            <div id="recurrence-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+                                <!-- Recurrences injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOCK 4: BENCHMARKS -->
+                <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">💻</span> Block 4 — The Interactive Chart</h2>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">⏱️ 3 Hours</span>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="bg-slate-800 p-6 rounded-xl shadow-inner mt-2 text-white mb-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-xl">📈</span>
+                                <h4 class="font-bold">Visual Intuition Viewer</h4>
+                            </div>
+                            <label class="task-row flex items-start gap-4 p-2 cursor-pointer mb-4" id="task-b2">
+                                <input type="checkbox" class="task-checkbox mt-1 border-slate-500 bg-slate-700 checked:bg-emerald-500 checked:border-emerald-500" onchange="toggleTask('b2')">
+                                <div class="flex-1">
+                                    <span class="task-text font-medium text-slate-200">Play with the chart and observe how N<sup>2</sup> explodes instantly.</span>
+                                </div>
+                            </label>
+                            
+                            <div class="mb-4 bg-slate-700 p-4 rounded-lg border border-slate-600 shadow-sm">
+                                <label for="n-slider" class="block text-sm font-bold text-slate-200 mb-2">Adjust N: <span id="n-display" class="text-blue-400">100</span></label>
+                                <input type="range" id="n-slider" min="10" max="1000" value="100" class="w-full cursor-pointer accent-blue-500">
+                            </div>
+
+                            <div class="bg-white p-2 rounded-xl">
+                                <div class="chart-container-line">
+                                    <canvas id="growthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+                <br><br>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const tasksMap = {
+            't1': 1, 't2': 1, 't3': 1, // Theory: 3 hours
+            'p1': 1, 'p2': 1, 'p3': 1, 'p4': 1, // Practice: 4 hours
+            'h1': 1.5, 'h2': 1.5, 'h3': 1, // Harder Analysis: 4 hours
+            'b2': 3 // Benchmarks: 3 hours
+        };
+        const totalPlannedHours = 14;
+        let completedTasks = new Set();
+        let progressChart;
+        let growthChart;
+
+        function initApp() {
+            initDonutChart();
+            initLineChart();
+            renderSnippets();
+            renderRecurrences();
+            document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        function toggleTask(taskId) {
+            const taskRow = document.getElementById(`task-${taskId}`);
+            if (completedTasks.has(taskId)) {
+                completedTasks.delete(taskId);
+                taskRow.classList.remove('completed');
+            } else {
+                completedTasks.add(taskId);
+                taskRow.classList.add('completed');
+            }
+            updateDashboard();
+        }
+
+        function calculateProgress() {
+            let hours = 0;
+            completedTasks.forEach(t => hours += tasksMap[t]);
+            return Math.min(hours, totalPlannedHours);
+        }
+
+        function updateDashboard() {
+            const completedHours = calculateProgress();
+            const remainingHours = totalPlannedHours - completedHours;
+            const percentage = Math.round((completedHours / totalPlannedHours) * 100);
+            
+            document.getElementById('hoursCompleted').innerHTML = `${completedHours.toFixed(1)}<span class="text-lg text-slate-500 font-medium">h</span>`;
+            document.getElementById('percentText').innerText = `${percentage}%`;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            
+            if(progressChart) {
+                progressChart.data.datasets[0].data = [completedHours, remainingHours];
+                progressChart.data.datasets[0].backgroundColor = percentage >= 99 ? ['#3b82f6', '#f1f5f9'] : ['#2563eb', '#f1f5f9'];
+                progressChart.update();
+            }
+        }
+
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if(el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function renderSnippets() {
+            const snippets = [
+                { code: "for(int i=0; i<n; i++) {\n    a += i;\n}", desc: "Simple iteration", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i+=2) {\n    a += i;\n}", desc: "Iterates n/2 times. Constants are dropped.", ans: "O(n)" },
+                { code: "for(int i=n; i>0; i--) {\n    a += i;\n}", desc: "Reverse iteration. Still runs n times.", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i++) { a++; }\nfor(int j=0; j<n; j++) { b++; }", desc: "Sequential loops. O(n) + O(n) = O(2n) -> O(n).", ans: "O(n)" },
+                { code: "int i = 0;\nwhile(i < n) {\n    i++;\n}", desc: "While loop equivalent to simple for loop.", ans: "O(n)" },
+                { code: "for(int i=1; i<n; i*=2) {\n    a++;\n}", desc: "i doubles every step. Takes log2(n) steps.", ans: "O(log n)" },
+                { code: "for(int i=n; i>1; i/=2) {\n    a++;\n}", desc: "n is halved every step. Takes log2(n) steps.", ans: "O(log n)" },
+                { code: "for(int i=1; i<n; i*=3) {\n    a++;\n}", desc: "Multiplies by 3. Base of log doesn't matter in Big O.", ans: "O(log n)" },
+                { code: "int i = n;\nwhile(i > 0) {\n    i = i / 10;\n}", desc: "Digit extraction loop. Runs log10(n) times.", ans: "O(log n)" },
+                { code: "for(int i=2; i<n; i=i*i) {\n    a++;\n}", desc: "i goes 2, 4, 16, 256. This is O(log(log n)).", ans: "O(log log n)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<n; j++) {\n    a++;\n  }\n}", desc: "Standard nested loops. n * n operations.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<m; j++) {\n    a++;\n  }\n}", desc: "Dependent on two variables. Cannot simplify to n² if n != m.", ans: "O(n * m)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<n; j++) {\n    for(int k=0; k<n; k++) {\n      a++;\n    }\n  }\n}", desc: "Triple nested loop.", ans: "O(n³)" },
+                { code: "for(int i=0; i<n; i+=2) {\n  for(int j=1; j<n; j+=3) {\n    a++;\n  }\n}", desc: "(n/2) * (n/3) operations. Constants are ignored.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n*n; i++) {\n    a++;\n}", desc: "Single loop, but runs n² times.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<i; j++) {\n    a++;\n  }\n}", desc: "Triangular. 0 + 1 + 2 + ... + (n-1) = n(n-1)/2.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=i; j<n; j++) {\n    a++;\n  }\n}", desc: "Inverted triangular. Runs n + (n-1) + ... + 1 times.", ans: "O(n²)" },
+                { code: "for(int i=1; i<=n; i++) {\n  for(int j=1; j<=100; j++) {\n    a++;\n  }\n}", desc: "Inner loop is O(1) constant. Overall is n * 100.", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=n; j>i; j--) {\n    a++;\n  }\n}", desc: "Another variation of n(n-1)/2.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n; i++) {\n  int j=i;\n  while(j<n && arr[j]!=0) {\n    j++;\n  }\n}", desc: "Worst case: arr has no zeros. Inner loop runs to n from i.", ans: "O(n²)" },
+                { code: "for(int i=1; i*i<=n; i++) {\n    a++;\n}", desc: "Stops when i² > n, which means i > √n.", ans: "O(√n)" },
+                { code: "int i=1;\nwhile(i <= n/i) {\n    i++;\n}", desc: "Equivalent to i² <= n. Runs √n times.", ans: "O(√n)" },
+                { code: "for(int i=0; i<Math.sqrt(n); i++) {\n    a++;\n}", desc: "Explicit square root.", ans: "O(√n)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=1; j*j<=i; j++) {\n    a++;\n  }\n}", desc: "Sum of √i from 1 to n. Integrates to n^(3/2).", ans: "O(n√n)" },
+                { code: "for(int i=0; i*i<n; i+=2) {\n    a++;\n}", desc: "Runs √n / 2 times.", ans: "O(√n)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=1; j<n; j*=2) {\n    a++;\n  }\n}", desc: "Outer is n, inner is log n. Independent.", ans: "O(n log n)" },
+                { code: "for(int i=1; i<n; i*=2) {\n  for(int j=0; j<n; j++) {\n    a++;\n  }\n}", desc: "Outer is log n, inner is n. Independent.", ans: "O(n log n)" },
+                { code: "for(int i=1; i<n; i*=2) {\n  for(int j=1; j<n; j*=2) {\n    a++;\n  }\n}", desc: "Both are logarithmic.", ans: "O(log² n)" },
+                { code: "for(int i=1; i<n; i++) {\n  for(int j=1; j<n; j+=i) {\n    a++;\n  }\n}", desc: "Harmonic series. (n/1 + n/2 + ... + n/n).", ans: "O(n log n)" },
+                { code: "for(int i=1; i<n; i*=2) {\n  for(int j=0; j<i; j++) {\n    a++;\n  }\n}", desc: "Geometric series: 1 + 2 + 4 + ... + n = 2n.", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i++) {\n  if(arr[i] == target) break;\n}", desc: "Linear search. Worst case target isn't found.", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=0; j<n; j++) {\n    if(arr[j] == target) break;\n  }\n}", desc: "Worst case: target not found, runs n*n times.", ans: "O(n²)" },
+                { code: "for(int i=0; i<n; i++) {\n  if(i % 2 == 0) continue;\n  for(int j=0; j<n; j++) { a++; }\n}", desc: "Inner loop runs n/2 times.", ans: "O(n²)" },
+                { code: "int j=0;\nfor(int i=0; i<n; i++) {\n  while(j<n && arr[j]<arr[i]) {\n    j++;\n  }\n}", desc: "Two pointers. `j` only moves forward and maxes at n across ALL `i` iterations.", ans: "O(n)" },
+                { code: "void dfs(int u) {\n  vis[u] = true;\n  for(int v : adj[u]) {\n    if(!vis[v]) dfs(v);\n  }\n}", desc: "Standard DFS on Graph (V vertices, E edges). Each edge checked once.", ans: "O(V + E)" },
+                { code: "for(int i=0; i<n; i++) {\n  for(int j=i; j<i+100; j++) {\n    a++;\n  }\n}", desc: "Inner loop runs strictly 100 times regardless of n.", ans: "O(n)" },
+                { code: "for(int i=0; i<n; i++) {\n  i += 2;\n}", desc: "i is incremented in loop and in body. Still linear.", ans: "O(n)" },
+                { code: "for(int i=1; i<=n; i++) {\n  for(int j=1; j*j<=i; j++) {\n    if(i%j == 0) a++;\n  }\n}", desc: "Finding divisors for all numbers 1 to n. Sum of √i.", ans: "O(n√n)" },
+                { code: "int count = 0;\nfor(int i=n; i>0; i/=2) {\n  for(int j=0; j<i; j++) {\n    count++;\n  }\n}", desc: "n + n/2 + n/4 + ... + 1 = 2n.", ans: "O(n)" },
+                { code: "for(int i=0; i<(1<<n); i++) {\n  for(int j=0; j<n; j++) {\n    if(i & (1<<j)) a++;\n  }\n}", desc: "Subset generation. Outer is 2^n, inner is n.", ans: "O(n * 2^n)" }
+            ];
+
+            const container = document.getElementById('snippet-container');
+            snippets.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col";
+                card.innerHTML = `
+                    <div class="bg-slate-900 text-slate-200 p-3 text-sm overflow-x-auto flex-1 font-mono leading-relaxed">
+                        <pre><code>${item.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+                    </div>
+                    <div class="p-3 bg-slate-50 border-t border-slate-200">
+                        <button onclick="toggleAnswer('ans-${index + 10}')" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors w-full text-left flex justify-between items-center">
+                            Problem ${index + 1} <span class="text-xs bg-blue-100 px-2 py-1 rounded text-blue-800">Reveal</span>
+                        </button>
+                        <div id="ans-${index + 10}" class="hidden mt-3 pt-3 border-t border-slate-200">
+                            <p class="text-[11px] text-slate-500 mb-2">${item.desc}</p>
+                            <p class="text-sm font-bold text-emerald-600 font-mono">${item.ans}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRecurrences() {
+            const recurrences = [
+                { rel: "T(n) = T(n-1) + 1", ans: "O(n)", desc: "1 operation n times." },
+                { rel: "T(n) = T(n-1) + n", ans: "O(n²)", desc: "n + (n-1) + ... + 1." },
+                { rel: "T(n) = T(n/2) + 1", ans: "O(log n)", desc: "Halves input, O(1) work." },
+                { rel: "T(n) = 2T(n/2) + 1", ans: "O(n)", desc: "Tree with n leaves, constant work." },
+                { rel: "T(n) = 2T(n/2) + n", ans: "O(n log n)", desc: "Halves input, branches twice, linear work." },
+                { rel: "T(n) = 3T(n/2) + n", ans: "O(n^(log₂3))", desc: "Master Theorem Case 1." },
+                { rel: "T(n) = T(n/2) + n", ans: "O(n)", desc: "n + n/2 + n/4... = 2n." },
+                { rel: "T(n) = 4T(n/2) + n²", ans: "O(n² log n)", desc: "Master Theorem Case 2." },
+                { rel: "T(n) = T(n/3) + T(2n/3) + n", ans: "O(n log n)", desc: "Unbalanced partition, tree depth log n." },
+                { rel: "T(n) = T(√n) + 1", ans: "O(log log n)", desc: "Square root recursion." }
+            ];
+            const recContainer = document.getElementById('recurrence-container');
+            recurrences.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded p-4 shadow-sm";
+                card.innerHTML = `
+                    <div class="font-mono font-bold text-slate-800 mb-2 text-sm">${item.rel}</div>
+                    <button onclick="toggleAnswer('rec-${index}')" class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-1 rounded">Reveal</button>
+                    <div id="rec-${index}" class="hidden mt-3 pt-2 border-t border-slate-100">
+                        <span class="font-mono text-emerald-600 font-bold">${item.ans}</span>
+                        <p class="text-[11px] text-slate-500 mt-1">${item.desc}</p>
+                    </div>
+                `;
+                recContainer.appendChild(card);
+            });
+        }
+
+        // ---------- Chart Setup ----------
+        function initDonutChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            progressChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed Time', 'Remaining Time'],
+                    datasets: [{
+                        data: [0, totalPlannedHours],
+                        backgroundColor: ['#2563eb', '#f1f5f9'],
+                        borderWidth: 0, hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '80%',
+                    plugins: { legend: { display: false } },
+                    animation: { animateScale: true, animateRotate: true }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw: chart => {
+                        const {width, height, ctx} = chart; ctx.restore();
+                        const percent = Math.round((chart.data.datasets[0].data[0] / totalPlannedHours) * 100) || 0;
+                        ctx.font = "900 " + (height / 100).toFixed(2) + "em Inter, sans-serif";
+                        ctx.textBaseline = "middle"; ctx.fillStyle = "#1e293b";
+                        ctx.fillText(percent + "%", Math.round((width - ctx.measureText(percent + "%").width) / 2), height / 2.1);
+                        ctx.font = "bold " + (height / 250).toFixed(2) + "em Inter, sans-serif"; ctx.fillStyle = "#64748b";
+                        ctx.fillText("DONE", Math.round((width - ctx.measureText("DONE").width) / 2), (height / 2.1) + (height*0.18));
+                        ctx.save();
+                    }
+                }]
+            });
+        }
+
+        function initLineChart() {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // N values
+                    datasets: [
+                        { label: 'O(N)', data: [], borderColor: '#10b981', tension: 0.1, pointRadius: 0 },
+                        { label: 'O(N log N)', data: [], borderColor: '#3b82f6', tension: 0.1, pointRadius: 0 },
+                        { label: 'O(N²)', data: [], borderColor: '#ef4444', tension: 0.1, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Input Size (N)' } },
+                        y: { type: 'logarithmic', title: { display: true, text: 'Operations' }, min: 1 }
+                    },
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+            updateLineChart();
+        }
+
+        function updateLineChart() {
+            if(!growthChart) return;
+            const maxN = parseInt(document.getElementById('n-slider').value);
+            document.getElementById('n-display').innerText = maxN;
+
+            const labels = [];
+            const dataN = [];
+            const dataNLogN = [];
+            const dataN2 = [];
+
+            const step = Math.max(1, Math.floor(maxN / 50));
+            for(let i = step; i <= maxN; i += step) {
+                labels.push(i);
+                dataN.push(i);
+                dataNLogN.push(i * Math.log2(i));
+                dataN2.push(i * i);
+            }
+
+            growthChart.data.labels = labels;
+            growthChart.data.datasets[0].data = dataN;
+            growthChart.data.datasets[1].data = dataNLogN;
+            growthChart.data.datasets[2].data = dataN2;
+            growthChart.update();
+        }
+        document.getElementById('n-slider').addEventListener('input', updateLineChart);
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

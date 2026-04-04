@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 6: Array Edge Cases & Optimizations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f8fafc; color:#1e293b; }
+        .chart-container { position:relative; width:100%; max-width:240px; margin:auto; height:240px; }
+        .task-checkbox { appearance:none; background:#fff; width:1.4em; height:1.4em; border:2px solid #cbd5e1; border-radius:0.25em; display:grid; place-content:center; cursor:pointer; transition:all .2s; flex-shrink:0; }
+        .task-checkbox::before { content:""; width:.75em; height:.75em; transform:scale(0); transition:120ms transform ease-in-out; box-shadow:inset 1em 1em white; clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%); }
+        .task-checkbox:checked { background:#0ea5e9; border-color:#0ea5e9; }
+        .task-checkbox:checked::before { transform:scale(1); }
+        .task-row.completed .task-text { color:#94a3b8; text-decoration:line-through; }
+        .task-row.completed .pdesc { opacity:.5; }
+        pre,code { font-family:'ui-monospace','Menlo','Monaco','Consolas',monospace; }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-16">
+
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">DAY 6</h1>
+            <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mt-1">Algorithm Bootcamp</p>
+        </div>
+        <div class="bg-sky-50 px-4 py-2 rounded-xl border border-sky-100">
+            <div class="text-xl font-bold text-sky-700">Array Edge Cases &amp; Optimizations</div>
+            <div class="text-xs font-bold text-sky-500 uppercase tracking-wide">⚡ O(n²) → O(n) Mastery</div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+            <section class="bg-sky-600 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-28 h-28 bg-white opacity-10 rounded-full blur-2xl"></div>
+                <h2 class="text-lg font-bold flex items-center gap-2 mb-2"><span class="text-2xl">🎯</span> The Core Goal</h2>
+                <p class="text-sky-100 text-sm leading-relaxed">Master the art of writing <strong>correct</strong> array code on ALL inputs, not just samples. Cover every edge case. Squeeze O(n²) solutions to O(n) using prefix sums, sliding windows, two pointers, and monotone stacks.</p>
+            </section>
+
+            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="mb-5">
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Study Progress</h3>
+                    <p class="text-sm text-slate-500">Track your 16-hour mastery plan.</p>
+                </div>
+                <div class="chart-container mb-5">
+                    <canvas id="progressChart"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-3xl font-extrabold text-slate-800" id="hoursCompleted">0<span class="text-lg text-slate-500 font-medium">h</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Completed</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-3xl font-extrabold text-slate-800">16<span class="text-lg text-slate-500 font-medium">h</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Total Planned</div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="font-bold text-slate-700">Completion</span>
+                        <span class="font-bold text-sky-600" id="percentText">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner overflow-hidden">
+                        <div class="bg-sky-500 h-3 rounded-full transition-all duration-700 ease-out w-0" id="progressBar"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pattern Quick Ref -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><span>🗺️</span> Pattern Cheat Sheet</h3>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between bg-sky-50 px-3 py-2 rounded-lg"><span class="font-semibold text-sky-800">Prefix Sum + Map</span><span class="text-sky-600">count subarrays sum=k</span></div>
+                    <div class="flex justify-between bg-emerald-50 px-3 py-2 rounded-lg"><span class="font-semibold text-emerald-800">Sliding Window</span><span class="text-emerald-600">longest/shortest subarray</span></div>
+                    <div class="flex justify-between bg-violet-50 px-3 py-2 rounded-lg"><span class="font-semibold text-violet-800">Two Pointers</span><span class="text-violet-600">pair sum, sorted array</span></div>
+                    <div class="flex justify-between bg-amber-50 px-3 py-2 rounded-lg"><span class="font-semibold text-amber-800">Write Pointer</span><span class="text-amber-600">in-place removal</span></div>
+                    <div class="flex justify-between bg-rose-50 px-3 py-2 rounded-lg"><span class="font-semibold text-rose-800">Monotone Stack</span><span class="text-rose-600">next greater, max rect</span></div>
+                    <div class="flex justify-between bg-slate-100 px-3 py-2 rounded-lg"><span class="font-semibold text-slate-700">Difference Array</span><span class="text-slate-600">range update O(1)</span></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="mb-2">
+                <h2 class="text-2xl font-bold text-slate-800">16-Hour Mastery Plan</h2>
+                <p class="text-slate-500 mt-1 text-sm">Edge cases → pitfalls → optimization patterns → problems → interview drill.</p>
+            </div>
+
+            <!-- BLOCK 1: THEORY -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-sky-500"></div>
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">📚</span> Block 1 — Edge Case Theory &amp; Pitfalls</h2>
+                    <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-full">⏱️ 3 Hours</span>
+                </div>
+                <div class="p-6 space-y-3">
+                    <div class="bg-sky-50 p-3 border-l-4 border-sky-500 rounded-r-lg text-sky-900 text-sm mb-3">
+                        <strong>First principle:</strong> Judges craft inputs specifically to break naive assumptions. If your solution passes the sample but fails the judge, you hit an edge case. Know them all before coding.
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-t1">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t1')">
+                            <span class="task-text font-bold text-slate-800">8 Edge Case Types</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Empty, single, all-same, increasing/decreasing, overflow, negatives, duplicates, circular, boundary indices.</p>
+                            <button onclick="toggleAnswer('ans-t1')" class="text-xs bg-sky-100 text-sky-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Summary</button>
+                            <div id="ans-t1" class="hidden mt-3 p-4 bg-slate-800 rounded-xl text-slate-300 text-xs space-y-1">
+                                <p>🔴 <strong class="text-red-400">Empty (n=0):</strong> Add guard before any access.</p>
+                                <p>🟡 <strong class="text-yellow-400">Single (n=1):</strong> Init with arr[0], never 0 or INT_MIN.</p>
+                                <p>🟠 <strong class="text-orange-400">Overflow:</strong> sum ≤ 10^14 — use <code class="text-sky-300">long long</code>.</p>
+                                <p>🟢 <strong class="text-emerald-400">Negatives:</strong> Sliding window breaks — must handle separately.</p>
+                                <p>🔵 <strong class="text-sky-400">Circular:</strong> Use <code class="text-sky-300">i % n</code> or complement trick: total - min_subarray.</p>
+                                <p>⚪ <strong class="text-slate-300">Boundary:</strong> Loop ends at i &lt; n, not i ≤ n.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-t2">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t2')">
+                            <span class="task-text font-bold text-slate-800">4 Common Pitfalls</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Off-by-one, index OOB, integer overflow, wrong sorted assumptions.</p>
+                            <button onclick="toggleAnswer('ans-t2')" class="text-xs bg-sky-100 text-sky-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Details</button>
+                            <div id="ans-t2" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-sky-200 overflow-x-auto">// OFF-BY-ONE: prefix query
+// WRONG: prefix[r] - prefix[l-1]
+// RIGHT: prefix[r+1] - prefix[l]   (0-indexed)
+
+// OVERFLOW: use long long for sums
+long long sum = (long long)a + b;
+
+// INDEX OOB: cache n, don't use .size()-1 unsigned
+int n = arr.size();
+for(int i = 0; i &lt; n-1; i++) ...  // safe
+
+// UNSIGNED: arr.size()-1 when size==0 → HUGE number
+// Always cache: int n = arr.size();</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-t3">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('t3')">
+                            <span class="task-text font-bold text-slate-800">Complexity Table: O(n²) → O(n)</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <button onclick="toggleAnswer('ans-t3')" class="text-xs bg-sky-100 text-sky-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Table</button>
+                            <div id="ans-t3" class="hidden mt-3 overflow-x-auto border border-slate-200 rounded-lg text-xs bg-white">
+                                <table class="min-w-full">
+                                    <thead class="bg-slate-100"><tr><th class="p-2 border-b text-left">Problem</th><th class="p-2 border-b">Naive</th><th class="p-2 border-b">Optimized</th><th class="p-2 border-b text-left">Technique</th></tr></thead>
+                                    <tbody>
+                                        <tr class="border-b"><td class="p-2">Range sum query</td><td class="p-2 text-center text-red-600 font-mono">O(n)</td><td class="p-2 text-center text-emerald-600 font-mono">O(1)</td><td class="p-2">Prefix sum</td></tr>
+                                        <tr class="border-b bg-slate-50"><td class="p-2">Max subarray sum</td><td class="p-2 text-center text-red-600 font-mono">O(n²)</td><td class="p-2 text-center text-emerald-600 font-mono">O(n)</td><td class="p-2">Kadane's</td></tr>
+                                        <tr class="border-b"><td class="p-2">Range update+query</td><td class="p-2 text-center text-red-600 font-mono">O(n)</td><td class="p-2 text-center text-emerald-600 font-mono">O(1)</td><td class="p-2">Diff array</td></tr>
+                                        <tr class="border-b bg-slate-50"><td class="p-2">Two sum (sorted)</td><td class="p-2 text-center text-red-600 font-mono">O(n²)</td><td class="p-2 text-center text-emerald-600 font-mono">O(n)</td><td class="p-2">Two pointers</td></tr>
+                                        <tr class="border-b"><td class="p-2">Longest subarray ≤k</td><td class="p-2 text-center text-red-600 font-mono">O(n²)</td><td class="p-2 text-center text-emerald-600 font-mono">O(n)</td><td class="p-2">Sliding window</td></tr>
+                                        <tr><td class="p-2">Count subarrays=k</td><td class="p-2 text-center text-red-600 font-mono">O(n²)</td><td class="p-2 text-center text-emerald-600 font-mono">O(n)</td><td class="p-2">Prefix+HashMap</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BLOCK 2: LEVEL 1 PROBLEMS -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🟢</span> Block 2 — Level 1: Warm-Up (P1–P4)</h2>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full">⏱️ 3 Hours</span>
+                </div>
+                <div class="p-6 space-y-3">
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p1">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p1')">
+                            <span class="task-text font-bold text-slate-800">P1: Range Sum Queries — Prefix Sum</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Build O(n) prefix array → answer each query in O(1). Handles negatives perfectly.</p>
+                            <button onclick="toggleAnswer('ans-p1')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p1" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-emerald-200 overflow-x-auto">// Build: O(n)  Query: O(1)
+vector&lt;long long&gt; prefix(n+1, 0);
+for(int i=0; i&lt;n; i++) prefix[i+1] = prefix[i] + A[i];
+// Query sum(l,r):
+long long ans = prefix[r+1] - prefix[l];</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p2">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p2')">
+                            <span class="task-text font-bold text-slate-800">P2: Missing Number — Gauss / XOR</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">n*(n+1)/2 - sum(array). Edge: missing 0, missing n, n=1.</p>
+                            <button onclick="toggleAnswer('ans-p2')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p2" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-emerald-200 overflow-x-auto">int missingNumber(vector&lt;int&gt;&amp; nums) {
+    long long n = nums.size();
+    long long expected = n*(n+1)/2;
+    long long actual = 0;
+    for(int x: nums) actual += x;
+    return expected - actual;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p3">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p3')">
+                            <span class="task-text font-bold text-slate-800">P3: Move Zeros — Write Pointer</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Single write pointer advances only on non-zero. Then fill tail with zeros.</p>
+                            <button onclick="toggleAnswer('ans-p3')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p3" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-emerald-200 overflow-x-auto">void moveZeroes(vector&lt;int&gt;&amp; nums) {
+    int w = 0;
+    for(int x: nums) if(x) nums[w++] = x;
+    while(w &lt; nums.size()) nums[w++] = 0;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p4">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p4')">
+                            <span class="task-text font-bold text-slate-800">P4: Sorted &amp; Rotated — Count Drops</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Count drop points A[i] &gt; A[(i+1)%n]. At most 1 drop → valid rotation.</p>
+                            <button onclick="toggleAnswer('ans-p4')" class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p4" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-emerald-200 overflow-x-auto">bool check(vector&lt;int&gt;&amp; nums) {
+    int n=nums.size(), drops=0;
+    for(int i=0;i&lt;n;i++)
+        if(nums[i]&gt;nums[(i+1)%n]) drops++;
+    return drops &lt;= 1;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BLOCK 3: LEVEL 2 PROBLEMS -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🟡</span> Block 3 — Level 2: Core Patterns (P5–P10)</h2>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full">⏱️ 5 Hours</span>
+                </div>
+                <div class="p-6 space-y-3">
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p5">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p5')">
+                            <span class="task-text font-bold text-slate-800">P5: Longest Subarray Sum ≤ K — Sliding Window</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">⚠️ Only works for non-negative values. Window shrinks when sum &gt; k.</p>
+                            <button onclick="toggleAnswer('ans-p5')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p5" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">int solve(vector&lt;int&gt;&amp; A, int k) {
+    int l=0, ans=0; long long sum=0;
+    for(int r=0; r&lt;A.size(); r++) {
+        sum += A[r];
+        while(sum &gt; k) sum -= A[l++];
+        ans = max(ans, r-l+1);
+    }
+    return ans;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p6">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p6')">
+                            <span class="task-text font-bold text-slate-800">P6: Count Subarrays Sum = K — Prefix + Map</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">🔑 Sliding window FAILS with negatives. <code>map[0]=1</code> is critical — don't forget!</p>
+                            <button onclick="toggleAnswer('ans-p6')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p6" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">int subarraySum(vector&lt;int&gt;&amp; nums, int k) {
+    unordered_map&lt;long long,int&gt; freq;
+    freq[0] = 1;  // ← CRITICAL: empty prefix
+    long long prefix=0; int cnt=0;
+    for(int x: nums) {
+        prefix += x;
+        cnt += freq[prefix - k];
+        freq[prefix]++;
+    }
+    return cnt;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p7">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p7')">
+                            <span class="task-text font-bold text-slate-800">P7: House Robber — O(1) DP</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">dp[i] = max(dp[i-2]+A[i], dp[i-1]). Compress to 2 variables.</p>
+                            <button onclick="toggleAnswer('ans-p7')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p7" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">int rob(vector&lt;int&gt;&amp; A) {
+    int prev2=0, prev1=0;
+    for(int x: A) {
+        int curr = max(prev1, prev2+x);
+        prev2=prev1; prev1=curr;
+    }
+    return prev1;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p8">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p8')">
+                            <span class="task-text font-bold text-slate-800">P8: Min Size Subarray Sum ≥ S</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Shrink from left whenever sum ≥ s. Return 0 if no valid subarray found.</p>
+                            <button onclick="toggleAnswer('ans-p8')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p8" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">int minSubArrayLen(int s, vector&lt;int&gt;&amp; A) {
+    int l=0, ans=INT_MAX; long long sum=0;
+    for(int r=0; r&lt;A.size(); r++) {
+        sum+=A[r];
+        while(sum&gt;=s) { ans=min(ans,r-l+1); sum-=A[l++]; }
+    }
+    return ans==INT_MAX ? 0 : ans;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p9">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p9')">
+                            <span class="task-text font-bold text-slate-800">P9: Product Except Self — Dual Pass</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Forward pass: prefix products. Backward pass: multiply by suffix. O(1) extra space.</p>
+                            <button onclick="toggleAnswer('ans-p9')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p9" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">vector&lt;int&gt; productExceptSelf(vector&lt;int&gt;&amp; A) {
+    int n=A.size(); vector&lt;int&gt; res(n,1);
+    int left=1;
+    for(int i=0;i&lt;n;i++){ res[i]=left; left*=A[i]; }
+    int right=1;
+    for(int i=n-1;i&gt;=0;i--){ res[i]*=right; right*=A[i]; }
+    return res;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p10">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p10')">
+                            <span class="task-text font-bold text-slate-800">P10: Trapping Rain Water — Two Pointers</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">O(1) space: whichever side is shorter, its max determines water. Move inward.</p>
+                            <button onclick="toggleAnswer('ans-p10')" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p10" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-amber-200 overflow-x-auto">int trap(vector&lt;int&gt;&amp; h) {
+    int l=0, r=h.size()-1, lm=0, rm=0, w=0;
+    while(l&lt;r) {
+        if(h[l]&lt;=h[r]) { lm=max(lm,h[l]); w+=lm-h[l++]; }
+        else            { rm=max(rm,h[r]); w+=rm-h[r--]; }
+    }
+    return w;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BLOCK 4: LEVEL 3 ADVANCED -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🔴</span> Block 4 — Level 3: Advanced (P11–P15)</h2>
+                    <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded-full">⏱️ 5 Hours</span>
+                </div>
+                <div class="p-6 space-y-3">
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p11">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p11')">
+                            <span class="task-text font-bold text-slate-800">P11: Max Sum After K Negations — Greedy Sort</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Sort by |abs| desc. Flip negatives greedily. If k odd remains, flip smallest |abs|.</p>
+                            <button onclick="toggleAnswer('ans-p11')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p11" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-rose-200 overflow-x-auto">int largestSumAfterKNegations(vector&lt;int&gt;&amp; A, int k) {
+    sort(A.begin(),A.end(),[](int a,int b){return abs(a)&gt;abs(b);});
+    for(int i=0;i&lt;A.size()&amp;&amp;k;i++) if(A[i]&lt;0){A[i]=-A[i];k--;}
+    if(k%2) A.back()=-A.back();
+    return accumulate(A.begin(),A.end(),0);
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p12">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p12')">
+                            <span class="task-text font-bold text-slate-800">P12: Maximum Width Ramp — Monotone Stack</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Build decreasing stack (left candidates), sweep right-to-left to maximise j-i.</p>
+                            <button onclick="toggleAnswer('ans-p12')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p12" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-rose-200 overflow-x-auto">int maxWidthRamp(vector&lt;int&gt;&amp; A) {
+    int n=A.size(), ans=0; stack&lt;int&gt; st;
+    for(int i=0;i&lt;n;i++) if(st.empty()||A[st.top()]&gt;A[i]) st.push(i);
+    for(int j=n-1;j&gt;=0;j--)
+        while(!st.empty()&amp;&amp;A[st.top()]&lt;=A[j])
+            { ans=max(ans,j-st.top()); st.pop(); }
+    return ans;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p13">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p13')">
+                            <span class="task-text font-bold text-slate-800">P13: Shortest Subarray Sum ≥ K (w/ Negatives) — Prefix + Deque</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Negatives break sliding window. Use prefix sum + monotone deque. O(n).</p>
+                            <button onclick="toggleAnswer('ans-p13')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p13" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-rose-200 overflow-x-auto">int shortestSubarray(vector&lt;int&gt;&amp; A, int k) {
+    int n=A.size(), ans=INT_MAX;
+    vector&lt;long long&gt; pre(n+1,0);
+    for(int i=0;i&lt;n;i++) pre[i+1]=pre[i]+A[i];
+    deque&lt;int&gt; dq;
+    for(int r=0;r&lt;=n;r++) {
+        while(!dq.empty()&amp;&amp;pre[r]-pre[dq.front()]&gt;=k)
+            { ans=min(ans,r-dq.front()); dq.pop_front(); }
+        while(!dq.empty()&amp;&amp;pre[dq.back()]&gt;=pre[r]) dq.pop_back();
+        dq.push_back(r);
+    }
+    return ans==INT_MAX?-1:ans;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p14">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p14')">
+                            <span class="task-text font-bold text-slate-800">P14: Max Score (min×length) — Largest Rect Pattern</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Each element is the min for exactly one maximal range → use prev/next-smaller stacks.</p>
+                            <button onclick="toggleAnswer('ans-p14')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p14" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-rose-200 overflow-x-auto">long long maxScore(vector&lt;int&gt;&amp; A) {
+    int n=A.size(); long long ans=0;
+    vector&lt;int&gt; ps(n,-1), ns(n,n); stack&lt;int&gt; st;
+    for(int i=0;i&lt;n;i++){ while(!st.empty()&amp;&amp;A[st.top()]&gt;=A[i])st.pop(); ps[i]=st.empty()?-1:st.top(); st.push(i); }
+    while(!st.empty())st.pop();
+    for(int i=n-1;i&gt;=0;i--){ while(!st.empty()&amp;&amp;A[st.top()]&gt;=A[i])st.pop(); ns[i]=st.empty()?n:st.top(); st.push(i); }
+    for(int i=0;i&lt;n;i++) ans=max(ans,(long long)A[i]*(ns[i]-ps[i]-1));
+    return ans;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-p15">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('p15')">
+                            <span class="task-text font-bold text-slate-800">P15: Subarrays Divisible by K — Prefix Mod + Map</span>
+                        </label>
+                        <div class="ml-8 mt-2">
+                            <p class="pdesc text-xs text-slate-500 mb-2">Normalize negative remainders: <code class="text-rose-300">((prefix%k)+k)%k</code>. C++ % can be negative.</p>
+                            <button onclick="toggleAnswer('ans-p15')" class="text-xs bg-rose-100 text-rose-800 px-3 py-1.5 rounded font-bold uppercase">Reveal Solution</button>
+                            <div id="ans-p15" class="hidden mt-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                                <pre class="text-xs text-rose-200 overflow-x-auto">int subarraysDivByK(vector&lt;int&gt;&amp; A, int k) {
+    unordered_map&lt;int,int&gt; freq; freq[0]=1;
+    int prefix=0, cnt=0;
+    for(int x: A) {
+        prefix += x;
+        int rem = ((prefix%k)+k)%k;  // normalize negatives
+        cnt += freq[rem];
+        freq[rem]++;
+    }
+    return cnt;
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BLOCK 5: INTERVIEW DRILL -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-violet-500"></div>
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="text-2xl">🎙️</span> Block 5 — Interview Drill &amp; Review</h2>
+                    <span class="bg-violet-100 text-violet-800 text-xs font-bold px-3 py-1.5 rounded-full">⏱️ 2 Hours</span>
+                </div>
+                <div class="p-6 space-y-3">
+
+                    <div class="bg-violet-50 p-4 border-l-4 border-violet-500 rounded-r-lg text-violet-900 text-sm mb-3">
+                        <strong>Red Flags to Memorize:</strong> <code>int</code> for sums &gt;2×10⁹ · sliding window + negatives · no <code>map[0]=1</code> · <code>.size()-1</code> on empty · two-pointer on unsorted.
+                    </div>
+
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-i1">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('i1')">
+                            <span class="task-text font-bold text-slate-800">Explain P6 from scratch — derive prefix+map without memory</span>
+                        </label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-i2">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('i2')">
+                            <span class="task-text font-bold text-slate-800">Derive P10 two-pointer from the O(n) space prefix version</span>
+                        </label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-i3">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('i3')">
+                            <span class="task-text font-bold text-slate-800">Timed: P8 (min size subarray) — under 10 minutes</span>
+                        </label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-i4">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('i4')">
+                            <span class="task-text font-bold text-slate-800">Timed: P15 (divisible by K) — under 12 minutes</span>
+                        </label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="task-i5">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="toggleTask('i5')">
+                            <span class="task-text font-bold text-slate-800">Compile solutions.cpp and run runTests() — all pass</span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+            <br>
+        </div>
+    </div>
+</main>
+
+<script>
+    const tasksMap = {
+        't1':1,'t2':1,'t3':1,
+        'p1':0.75,'p2':0.75,'p3':0.75,'p4':0.75,
+        'p5':1,'p6':1,'p7':0.75,'p8':0.75,'p9':0.75,'p10':0.75,
+        'p11':1,'p12':1,'p13':1,'p14':1,'p15':1,
+        'i1':0.5,'i2':0.5,'i3':0.5,'i4':0.5,'i5':0.5
+    };
+    const totalHours = 16;
+    let completedTasks = new Set();
+    let progressChart;
+
+    function toggleTask(id) {
+        const row = document.getElementById('task-' + id);
+        if (completedTasks.has(id)) { completedTasks.delete(id); row.classList.remove('completed'); }
+        else { completedTasks.add(id); row.classList.add('completed'); }
+        updateDashboard();
+    }
+
+    function toggleAnswer(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function updateDashboard() {
+        let h = 0;
+        completedTasks.forEach(t => h += tasksMap[t] || 0);
+        h = Math.min(h, totalHours);
+        const pct = Math.round((h / totalHours) * 100);
+        document.getElementById('hoursCompleted').innerHTML = h.toFixed(1) + '<span class="text-lg text-slate-500 font-medium">h</span>';
+        document.getElementById('percentText').innerText = pct + '%';
+        document.getElementById('progressBar').style.width = pct + '%';
+        if (progressChart) {
+            progressChart.data.datasets[0].data = [h, totalHours - h];
+            progressChart.update();
+        }
+    }
+
+    function initChart() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        progressChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { datasets: [{ data: [0, totalHours], backgroundColor: ['#0ea5e9', '#f1f5f9'], borderWidth: 0 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '80%',
+                plugins: { legend: { display: false } }
+            },
+            plugins: [{
+                id: 'centerText',
+                beforeDraw: chart => {
+                    const { width, height, ctx } = chart; ctx.restore();
+                    const pct = Math.round((chart.data.datasets[0].data[0] / totalHours) * 100) || 0;
+                    ctx.font = '900 ' + (height / 100).toFixed(2) + 'em Inter,sans-serif';
+                    ctx.textBaseline = 'middle'; ctx.fillStyle = '#1e293b';
+                    ctx.fillText(pct + '%', Math.round((width - ctx.measureText(pct + '%').width) / 2), height / 2.1);
+                    ctx.font = 'bold ' + (height / 250).toFixed(2) + 'em Inter,sans-serif';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText('DONE', Math.round((width - ctx.measureText('DONE').width) / 2), height / 2.1 + height * 0.18);
+                    ctx.save();
+                }
+            }]
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initChart);
+</script>
+</body>
+</html>
