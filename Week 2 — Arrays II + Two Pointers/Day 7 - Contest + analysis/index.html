@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2 Capstone Contest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{font-family:'Inter',-apple-system,sans-serif;background:#0f172a;color:#f8fafc;} /* Dark Theme for contest */
+        .glass-panel{background:rgba(30,41,59,0.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);}
+        .status-btn{transition:all .2s;}
+        .status-btn:hover{transform:translateY(-2px);}
+        table{width:100%;text-align:left;border-collapse:collapse;}
+        th,td{padding:12px 15px;border-bottom:1px solid rgba(255,255,255,0.05);}
+        th{color:#94a3b8;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;border-bottom-color:rgba(255,255,255,0.1);}
+        tr:hover td{background:rgba(255,255,255,0.02);}
+    </style>
+</head>
+<body class="min-h-screen pb-16 flex flex-col">
+<header class="glass-panel sticky top-0 z-20 shadow-xl border-b-0 border-slate-700">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+            <div class="text-xs font-bold text-sky-400 uppercase tracking-widest">Week 2 Capstone</div>
+            <h1 class="text-2xl font-extrabold text-white flex items-center gap-3">
+                <span class="text-3xl">🏆</span> Array & Two Pointers Mastery
+            </h1>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="text-center">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Time Remaining</div>
+                <div id="timer" class="text-3xl font-mono font-bold text-emerald-400 tracking-tight">02:30:00</div>
+            </div>
+            <button id="start-btn" onclick="startContest()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-colors border border-indigo-500">
+                Start Contest
+            </button>
+        </div>
+    </div>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+    <div class="lg:col-span-8 space-y-6">
+        <div class="glass-panel rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-slate-800/50 px-6 py-4 border-b border-slate-700">
+                <h2 class="text-lg font-bold text-slate-200">Problem Set (A - G)</h2>
+            </div>
+            <div class="p-0 overflow-x-auto">
+                <table id="problems-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Problem Name</th>
+                            <th>Difficulty</th>
+                            <th>Time / Space</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS Rendered -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+        <div class="glass-panel rounded-2xl shadow-xl p-6">
+            <h3 class="font-bold text-slate-200 mb-4 border-b border-slate-700 pb-2">Contest Rules</h3>
+            <ul class="text-sm text-slate-400 space-y-3">
+                <li class="flex items-start gap-2"><span class="text-rose-400">⚠️</span> No external resources or IDE templates.</li>
+                <li class="flex items-start gap-2"><span class="text-indigo-400">⏰</span> Strictly adhere to the 2.5 hour time limit.</li>
+                <li class="flex items-start gap-2"><span class="text-emerald-400">🧠</span> Focus on optimal space constraints (often O(1)).</li>
+                <li class="flex items-start gap-2"><span class="text-amber-400">📝</span> Maintain your own scoreboard locally. Use statuses to track.</li>
+            </ul>
+        </div>
+        <div class="glass-panel rounded-2xl shadow-xl p-6">
+            <h3 class="font-bold text-slate-200 mb-4 border-b border-slate-700 pb-2">Analysis Phase</h3>
+            <div class="text-sm text-slate-400">
+                <p class="mb-3">Do not open <code class="text-sky-300">solutions.cpp</code> until the timer hits exactly zero, or you have completed all problems.</p>
+                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 font-mono text-xs">
+                    Goal: 7000 Rating Points
+                </div>
+            </div>
+        </div>
+    </aside>
+</main>
+<script>
+const problems = [
+    {id:'A', name:'Remove Duplicates II', diff:'900', target:'O(n) / O(1)', pts:500},
+    {id:'B', name:'Sort Colors', diff:'1000', target:'O(n) / O(1)', pts:750},
+    {id:'C', name:'Subarray Product < K', diff:'1200', target:'O(n) / O(1)', pts:1000},
+    {id:'D', name:'Rotate Image', diff:'1300', target:'O(n²) / O(1)', pts:1000},
+    {id:'E', name:'Meeting Rooms II', diff:'1400', target:'O(n log n)', pts:1250},
+    {id:'F', name:'Minimum Window Substring', diff:'1600', target:'O(n)', pts:1250},
+    {id:'G', name:'First Missing Positive', diff:'1800', target:'O(n) / O(1)', pts:1250}
+];
+
+let timeLeft = 2.5 * 3600;
+let timerId = null;
+
+function renderTable() {
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = problems.map(p => `
+        <tr>
+            <td class="font-bold text-sky-400">${p.id}</td>
+            <td class="font-medium text-slate-200">${p.name}</td>
+            <td><span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full border border-slate-700">${p.diff}</span></td>
+            <td class="text-xs font-mono text-slate-400">${p.target}</td>
+            <td class="text-center">
+                <select class="bg-slate-800 border border-slate-600 text-slate-300 text-xs rounded px-2 py-1 outline-none focus:border-sky-500 cursor-pointer" onchange="updateStyle(this)">
+                    <option value="unattempted">Unattempted</option>
+                    <option value="coding" class="text-amber-400">Coding...</option>
+                    <option value="accepted" class="text-emerald-400">Accepted</option>
+                    <option value="wrong" class="text-rose-400">Wrong Answer</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updateStyle(select) {
+    if(select.value === 'accepted') select.style.color = '#34d399';
+    else if(select.value === 'coding') select.style.color = '#fbbf24';
+    else if(select.value === 'wrong') select.style.color = '#fb7185';
+    else select.style.color = '#cbd5e1';
+}
+
+function formatTime(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+function startContest() {
+    if(timerId) return;
+    document.getElementById('start-btn').textContent = 'Contest Running';
+    document.getElementById('start-btn').classList.replace('bg-indigo-600', 'bg-slate-700');
+    document.getElementById('start-btn').classList.replace('border-indigo-500', 'border-slate-600');
+    
+    timerId = setInterval(() => {
+        timeLeft--;
+        const timerEl = document.getElementById('timer');
+        timerEl.textContent = formatTime(timeLeft);
+        if(timeLeft <= 300) timerEl.classList.replace('text-emerald-400', 'text-rose-500'); // last 5 mins
+        if(timeLeft <= 0) {
+            clearInterval(timerId);
+            timerEl.textContent = "00:00:00";
+            alert("Contest Over! Proceed to the Analysis phase.");
+        }
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', renderTable);
+</script>
+</body>
+</html>

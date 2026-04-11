@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 3: Frequency Maps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{font-family:'Inter',-apple-system,sans-serif;background:#f8fafc;color:#1e293b;}
+        .task-checkbox{appearance:none;background:#fff;width:1.4em;height:1.4em;border:2px solid #cbd5e1;border-radius:.25em;display:grid;place-content:center;cursor:pointer;transition:all .2s;}
+        .task-checkbox::before{content:"";width:.75em;height:.75em;transform:scale(0);transition:120ms transform ease-in-out;box-shadow:inset 1em 1em white;clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%);}
+        .task-checkbox:checked{background:#eab308;border-color:#eab308;}
+        .task-checkbox:checked::before{transform:scale(1);}
+        .task-row.done .task-text{color:#94a3b8;text-decoration:line-through;}
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Week 3 · Day 3</div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Frequency Maps</h1>
+        </div>
+        <div class="bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-100">
+            <div class="text-lg font-bold text-yellow-700">int cnt[128] = {0}</div>
+            <div class="text-xs font-bold text-yellow-600 uppercase">⚡ O(1) Memory Counters</div>
+        </div>
+    </div>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <aside class="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+        <section class="bg-yellow-500 text-white p-5 rounded-2xl shadow-lg">
+            <h2 class="text-lg font-bold mb-3">🎯 Hashing Primitives</h2>
+            <div class="bg-yellow-700 p-3 rounded-xl font-mono text-xs text-yellow-100 space-y-1">
+                <div>// Anagram Map Check</div>
+                <div>for(char c: s) map[c]++;</div>
+                <div>for(char c: t) map[c]--;</div>
+                <div>// Palindrome Math</div>
+                <div>ans += (map[x] / 2) * 2;</div>
+            </div>
+        </section>
+        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3">Progress</h3>
+            <div class="relative w-48 h-48 mx-auto">
+                <canvas id="donut"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center flex-col"><span class="text-2xl font-black text-slate-800" id="pct">0%</span><span class="text-xs text-slate-500 font-bold">DONE</span></div>
+            </div>
+            <div class="mt-3 flex justify-between text-sm"><span class="font-bold text-slate-600" id="hDone">0h</span><span class="text-slate-400">/ 14h</span></div>
+            <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden"><div class="bg-yellow-400 h-2 rounded-full transition-all" style="width:0" id="pBar"></div></div>
+        </section>
+    </aside>
+    <div class="lg:col-span-8 space-y-5" id="task-list"></div>
+</main>
+<script>
+const TOTAL=14; let done=new Set(), hrs=0; let chart;
+const blocks=[
+    {title:'📚 Block 1 — Theory',time:'2h',color:'yellow',tasks:[
+        {id:'t1',h:1,text:'Visualize `vector<string> buckets` for freq sorting.'},
+        {id:'t2',h:1,text:'Why are array lookups vastly faster than std::unordered_map?'},
+    ]},
+    {title:'🟢 Block 2 — Basics (P1, P2, P3, P5, P6)',time:'5h',color:'emerald',tasks:[
+        {id:'p1',h:1,text:'P1: Valid Anagram',hint:'count[26]. All must be 0.'},
+        {id:'p5',h:1,text:'P5: Ransom Note',hint:'map must not drop below 0'},
+        {id:'p6',h:1,text:'P6: First Unique Char',hint:'map[s[i]] == 1'},
+        {id:'p2',h:1,text:'P2: Find the Difference',hint:'XOR all chars together'},
+        {id:'p3',h:1,text:'P3: Longest Palindrome',hint:'Sum all even groupings. Allow +1 max if odd grouping exists.'},
+    ]},
+    {title:'🟡 Block 3 — Group/Sort (P4, P7, P8)',time:'3h',color:'orange',tasks:[
+        {id:'p4',h:1,text:'P4: Group Anagrams',hint:'Key: string, Val: vector<string>'},
+        {id:'p7',h:1.5,text:'P7: Sort Char By Frequency',hint:'Bucket max_freq+1. Rebuild.'},
+        {id:'p8',h:.5,text:'P8: Max Balloons',hint:'min(b, a, l/2, o/2, n)'},
+    ]},
+    {title:'🔴 Block 4 — The LRU Challenge (P9, P10)',time:'4h',color:'rose',tasks:[
+        {id:'p9',h:2,text:'P9: LRU Cache',hint:'map + list. splice() pushes to front in O(1)'},
+        {id:'p10',h:2,text:'P10: LFU Cache',hint:'Dual maps. Key->Val+Freq Map, Freq->List Map'},
+    ]},
+];
+function toggle(id){document.getElementById(id).classList.toggle('hidden');}
+function tick(id,h){
+    const row=document.getElementById('t-'+id);
+    if(done.has(id)){done.delete(id);hrs-=h;row.classList.remove('done');}
+    else{done.add(id);hrs+=h;row.classList.add('done');}
+    const p=Math.min(Math.round(hrs/TOTAL*100),100);
+    document.getElementById('pct').textContent=p+'%';
+    document.getElementById('hDone').textContent=hrs.toFixed(1)+'h';
+    document.getElementById('pBar').style.width=p+'%';
+    if(chart){chart.data.datasets[0].data=[hrs,TOTAL-hrs];chart.update();}
+}
+function buildUI(){
+    const colorMap={yellow:'#eab308',emerald:'#10b981',orange:'#f97316',rose:'#f43f5e',sky:'#0ea5e9'};
+    const container=document.getElementById('task-list');
+    container.innerHTML=blocks.map(b=>`
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-800">${b.title}</h2>
+                <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:${colorMap[b.color]}20;color:${colorMap[b.color]}">⏱ ${b.time}</span>
+            </div>
+            <div class="p-5 space-y-3">
+                ${b.tasks.map(t=>`
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-${t.id}">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="tick('${t.id}',${t.h})">
+                            <span class="task-text font-semibold text-slate-800">${t.text}</span>
+                        </label>
+                        ${t.hint?`<div class="ml-8 mt-1"><button onclick="toggle('h-${t.id}')" class="text-xs font-bold px-2 py-1 rounded uppercase" style="background:${colorMap[b.color]}20;color:${colorMap[b.color]}">Hint</button><div id="h-${t.id}" class="hidden mt-2 text-xs bg-slate-800 px-3 py-2 rounded-xl" style="color:${colorMap[b.color]}">${t.hint}</div></div>`:''}
+                    </div>`).join('')}
+            </div>
+        </section>`).join('');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+    buildUI();
+    chart=new Chart(document.getElementById('donut').getContext('2d'),{
+        type:'doughnut',data:{datasets:[{data:[0,TOTAL],backgroundColor:['#eab308','#f1f5f9'],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'80%',plugins:{legend:{display:false}}}
+    });
+});
+</script>
+</body>
+</html>

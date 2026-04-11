@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 7: Weekly Contest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{font-family:'Inter',-apple-system,sans-serif;background:#0f172a;color:#f8fafc;}
+        .task-checkbox{appearance:none;background:#1e293b;width:1.4em;height:1.4em;border:2px solid #334155;border-radius:.25em;display:grid;place-content:center;cursor:pointer;transition:all .2s;}
+        .task-checkbox::before{content:"";width:.75em;height:.75em;transform:scale(0);transition:120ms transform ease-in-out;box-shadow:inset 1em 1em white;clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%);}
+        .task-checkbox:checked{background:#ef4444;border-color:#ef4444;}
+        .task-checkbox:checked::before{transform:scale(1);}
+        .task-row.done .task-text{color:#64748b;text-decoration:line-through;}
+        .bg-card{background:#1e293b;}
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+<header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-20 shadow-xl">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div>
+            <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Week 3 · Day 7</div>
+            <h1 class="text-2xl font-extrabold text-white flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> Contest Day</h1>
+        </div>
+        <div class="text-right">
+            <div class="text-2xl font-mono font-bold text-red-500" id="timer">02:00:00</div>
+            <button onclick="startTimer()" class="text-xs mt-1 bg-red-500/20 text-red-400 px-3 py-1 rounded hover:bg-red-500/40 transition">START CLOCK</button>
+        </div>
+    </div>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <aside class="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+        <section class="bg-red-600 text-white p-5 rounded-2xl shadow-lg shadow-red-900/50 relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 text-7xl opacity-20">🏆</div>
+            <h2 class="text-lg font-bold mb-1">Virtual Contest</h2>
+            <p class="text-sm text-red-100 mb-3">6 Problems. 120 Minutes.</p>
+            <div class="bg-red-900/50 p-3 rounded-xl font-mono text-xs text-red-200">
+                A - 500  (Sets)<br>
+                B - 1000 (Fixed Arrays)<br>
+                C - 1500 (Prefix Modulo)<br>
+                D - 2000 (Variables)<br>
+                E - 2500 (Prefix Inverse)<br>
+                F - 3000 (Exact Logic)
+            </div>
+        </section>
+        <section class="bg-card p-5 rounded-2xl shadow-sm border border-slate-800">
+            <h3 class="font-bold text-slate-200 mb-3">Completion</h3>
+            <div class="relative w-48 h-48 mx-auto">
+                <canvas id="donut"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center flex-col"><span class="text-2xl font-black text-white" id="pct">0%</span></div>
+            </div>
+            <div class="mt-3 flex justify-between text-sm"><span class="font-bold text-slate-400" id="hDone">0 / 6 solved</span></div>
+            <div class="w-full bg-slate-800 rounded-full h-2 mt-2 overflow-hidden"><div class="bg-red-500 h-2 rounded-full transition-all" style="width:0" id="pBar"></div></div>
+        </section>
+    </aside>
+    <div class="lg:col-span-8 space-y-5" id="task-list"></div>
+</main>
+<script>
+let timerInt;
+function startTimer(){
+    if(timerInt) return;
+    let time = 7200; // 2 hours
+    timerInt = setInterval(()=>{
+        time--;
+        if(time<0){ clearInterval(timerInt); alert("Time is up! Stop coding."); return; }
+        const h = Math.floor(time / 3600), m = Math.floor((time%3600)/60), s = time%60;
+        document.getElementById('timer').textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+}
+
+const TOTAL=6; let done=new Set(), hrs=0; let chart;
+const blocks=[
+    {title:'⚔️ The Contest (2 Hours)',color:'red',tasks:[
+        {id:'pA',text:'[500] Problem A: Max Erasure Value'},
+        {id:'pB',text:'[1000] Problem B: Find All Anagrams'},
+        {id:'pC',text:'[1500] Problem C: Subarray Sums Divisible'},
+        {id:'pD',text:'[2000] Problem D: Max Consecutive Ones III'},
+        {id:'pE',text:'[2500] Problem E: Make Sum Divisible'},
+        {id:'pF',text:'[3000] Problem F: K Different Integers'}
+    ]},
+    {title:'📖 Analysis & Upsolving (6 Hours)',color:'slate',tasks:[
+        {id:'r1',text:'Read Problem A/B Editorials'},
+        {id:'r2',text:'Read Problem C/D Editorials'},
+        {id:'r3',text:'Read Problem E/F Editorials'},
+        {id:'u1',text:'Upsolve C from scratch'},
+        {id:'u2',text:'Upsolve E from scratch'},
+        {id:'u3',text:'Upsolve F from scratch'}
+    ]}
+];
+
+function tick(id){
+    const row=document.getElementById('t-'+id);
+    if(done.has(id)){done.delete(id);row.classList.remove('done');}
+    else{done.add(id);row.classList.add('done');}
+    
+    // Only count contest problems for the circle tracking
+    let solved=0;
+    ['pA','pB','pC','pD','pE','pF'].forEach(x=>{if(done.has(x)) solved++;});
+    
+    const p=Math.min(Math.round((done.size)/12*100),100);
+    document.getElementById('pct').textContent=p+'%';
+    document.getElementById('hDone').textContent=`${solved} / 6 solved`;
+    document.getElementById('pBar').style.width=p+'%';
+    if(chart){chart.data.datasets[0].data=[done.size,12-done.size];chart.update();}
+}
+
+function buildUI(){
+    const container=document.getElementById('task-list');
+    container.innerHTML=blocks.map(b=>`
+        <section class="bg-card rounded-2xl shadow-sm border border-slate-800 overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-white">${b.title}</h2>
+            </div>
+            <div class="p-5 space-y-3">
+                ${b.tasks.map(t=>`
+                    <div class="task-row p-3 hover:bg-slate-800/50 rounded-xl transition" id="t-${t.id}">
+                        <label class="flex items-start gap-4 cursor-pointer">
+                            <input type="checkbox" class="task-checkbox mt-0.5" onchange="tick('${t.id}')">
+                            <span class="task-text font-semibold text-slate-300 tracking-wide">${t.text}</span>
+                        </label>
+                    </div>`).join('')}
+            </div>
+        </section>`).join('');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+    buildUI();
+    chart=new Chart(document.getElementById('donut').getContext('2d'),{
+        type:'doughnut',data:{datasets:[{data:[0,12],backgroundColor:['#ef4444','#334155'],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'80%',plugins:{legend:{display:false}}}
+    });
+});
+</script>
+</body>
+</html>

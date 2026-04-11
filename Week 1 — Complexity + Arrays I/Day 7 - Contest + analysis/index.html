@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 7 — Array Siege Contest Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; background:#0f172a; color:#e2e8f0; }
+        pre, code { font-family: 'ui-monospace','Menlo','Monaco',monospace; }
+        .problem-card { transition: all .3s; }
+        .problem-card.solved { border-color: #22c55e !important; }
+        .problem-card.attempted { border-color: #f59e0b !important; }
+        .diff-tag { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; }
+        #timer { font-variant-numeric: tabular-nums; }
+        .timer-danger { color: #ef4444 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+        textarea { resize: vertical; }
+        .badge { display:inline-block; padding:1px 8px; border-radius:99px; font-size:11px; font-weight:700; }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+<!-- HEADER -->
+<header class="bg-slate-900 border-b border-slate-700 sticky top-0 z-30 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+        <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Week 1 · Day 7</div>
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">⚔️ Array Siege <span class="text-slate-400 font-normal text-lg">— Contest</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-center">
+                <div class="text-3xl font-extrabold text-emerald-400" id="timer">2:30:00</div>
+                <div class="text-xs text-slate-500 font-bold uppercase">Time Remaining</div>
+            </div>
+            <div class="flex gap-2">
+                <button id="btnStart" onclick="startTimer()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition">▶ Start</button>
+                <button id="btnPause" onclick="pauseTimer()" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition">⏸ Pause</button>
+                <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition">↺ Reset</button>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+            <span class="text-slate-400">Score:</span>
+            <span class="text-2xl font-extrabold text-sky-400" id="scoreDisplay">0</span>
+            <span class="text-slate-500">/ 8750</span>
+        </div>
+    </div>
+    <!-- Progress bar -->
+    <div class="h-1 bg-slate-800">
+        <div id="timerBar" class="h-1 bg-emerald-500 transition-all duration-1000" style="width:100%"></div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- SCOREBOARD SIDEBAR -->
+        <div class="lg:col-span-3 space-y-4">
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4">
+                <h3 class="font-bold text-slate-300 mb-3 flex items-center gap-2"><span>📊</span> Scoreboard</h3>
+                <div class="space-y-2" id="scoreBoard">
+                    <!-- filled by JS -->
+                </div>
+            </div>
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4">
+                <h3 class="font-bold text-slate-300 mb-2 text-sm">⚡ Complexity Ref</h3>
+                <div class="space-y-1 text-xs text-slate-400">
+                    <div class="flex justify-between"><span>Prefix sum build</span><span class="font-mono text-emerald-400">O(n)</span></div>
+                    <div class="flex justify-between"><span>Prefix sum query</span><span class="font-mono text-emerald-400">O(1)</span></div>
+                    <div class="flex justify-between"><span>Difference array</span><span class="font-mono text-emerald-400">O(n+q)</span></div>
+                    <div class="flex justify-between"><span>Kadane's</span><span class="font-mono text-emerald-400">O(n)</span></div>
+                    <div class="flex justify-between"><span>Merge sort inversions</span><span class="font-mono text-sky-400">O(n log n)</span></div>
+                    <div class="flex justify-between"><span>Circular Kadane</span><span class="font-mono text-emerald-400">O(n)</span></div>
+                </div>
+            </div>
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4">
+                <h3 class="font-bold text-slate-300 mb-2 text-sm">🚨 Red Flags</h3>
+                <div class="text-xs text-slate-400 space-y-1">
+                    <div>• int → sum overflow (use long long)</div>
+                    <div>• freq[0]=1 missing in HashMap problems</div>
+                    <div>• All-negative in circular Kadane</div>
+                    <div>• D[r+1] out of bounds (alloc n+2)</div>
+                    <div>• L[] must be running-max, not curr</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROBLEMS MAIN -->
+        <div class="lg:col-span-9 space-y-4">
+
+            <!-- Problem A -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-A">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">A</span>
+                        <div>
+                            <div class="font-bold text-white text-lg">Lucky Prefix</div>
+                            <div class="text-xs text-slate-400">Prefix Sum · long long</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-green-900 text-green-300">★ 900</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">500 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-A">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Given an array <code class="text-sky-400">a</code> of <strong>n positive integers</strong>. Find the <strong>minimum index k</strong> (1-indexed) such that the sum of the first k elements is <strong>strictly greater</strong> than the sum of the remaining n−k elements. If no such k exists, print <code class="text-red-400">-1</code>.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">5
+1 2 3 4 5</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">3</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 2×10⁵<br>a[i] ≤ 10⁹</div></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mb-3">
+                        <textarea id="ans-A" rows="3" placeholder="Write your approach or code here..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500"></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('A', 500)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('A')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-A" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Key Insight:</p>
+                        <p class="text-slate-300 mb-2">Build prefix sum. For index k: <code class="text-sky-300">prefix[k] &gt; total - prefix[k]</code> → <code class="text-sky-300">2*prefix[k] &gt; total</code>. Scan left to right.</p>
+                        <p class="text-red-400 font-bold mb-1">🚨 Critical: Use long long! Sum reaches 2×10¹⁴.</p>
+                        <pre class="text-emerald-300 overflow-x-auto">long long total=0; for(auto x:a) total+=x;
+long long prefix=0;
+for(int k=1;k&lt;=n;k++){
+    prefix+=a[k-1];
+    if(prefix*2 &gt; total){ cout&lt;&lt;k; return 0; }
+}
+cout&lt;&lt;-1;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem B -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-B">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">B</span>
+                        <div><div class="font-bold text-white text-lg">Storm Coverage</div><div class="text-xs text-slate-400">Difference Array</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-green-900 text-green-300">★ 1100</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">750 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-B">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p><strong>n</strong> weather stations. <strong>q</strong> storms, each adds <code class="text-sky-400">rain</code> to all stations in range <code class="text-sky-400">[l, r]</code>. Find station with maximum total rainfall (smallest index if tie).</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">5 3
+1 3 10
+2 4 20
+3 5 5</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">3</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 10⁶<br>q ≤ 10⁵<br>rain ≤ 10⁴</div></div>
+                        </div>
+                    </div>
+                    <textarea id="ans-B" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('B', 750)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('B')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-B" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Key Insight: Difference Array</p>
+                        <p class="text-slate-300 mb-2">O(n×q) TLEs. Apply D[l]+=rain, D[r+1]-=rain for each storm. Take prefix of D[] to get final rainfall.</p>
+                        <pre class="text-emerald-300 overflow-x-auto">vector&lt;long long&gt; D(n+2,0);
+// for each storm: D[l]+=r; D[r+1]-=r;
+// then prefix sum D[1..n], track argmax</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem C -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-C">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">C</span>
+                        <div><div class="font-bold text-white text-lg">Zero Hunters</div><div class="text-xs text-slate-400">Prefix + HashMap</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-yellow-900 text-yellow-300">★ 1200</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">1000 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-C">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Count subarrays with <strong>sum exactly 0</strong>. Array can have negatives.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">4
+0 0 0 0</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">10</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 3×10⁴<br>|a[i]| ≤ 10⁴</div></div>
+                        </div>
+                    </div>
+                    <textarea id="ans-C" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('C', 1000)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('C')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-C" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Key Insight: Prefix + freq map</p>
+                        <p class="text-red-400 mb-1">🚨 freq[0]=1 BEFORE the loop — don't forget!</p>
+                        <pre class="text-emerald-300 overflow-x-auto">map&lt;long long,long long&gt; freq; freq[0]=1;
+long long prefix=0, ans=0;
+for(int x:a){ prefix+=x; ans+=freq[prefix]; freq[prefix]++; }</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem D -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-D">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">D</span>
+                        <div><div class="font-bold text-white text-lg">Maximum Flip Gain</div><div class="text-xs text-slate-400">Kadane Min Subarray</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-yellow-900 text-yellow-300">★ 1400</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">1250 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-D">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Choose exactly one contiguous subarray and negate all its elements. Maximize total array sum.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">5
+-5 2 3 -1 4</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">13</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 2×10⁵<br>|a[i]| ≤ 10⁹</div></div>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-500">Negate [-5]: total = -5+2+3-1+4 = 3. New = 5+2+3-1+4 = 13.</div>
+                    </div>
+                    <textarea id="ans-D" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('D', 1250)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('D')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-D" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Key Insight: total − 2 × min_subarray</p>
+                        <p class="text-slate-300 mb-2">Negating [l,r]: new_total = total − 2×sum(l,r). Minimize sum(l,r) = run Kadane for min. <br>Works for all cases: if min &ge; 0 (all positive), we still negate the min single element.</p>
+                        <pre class="text-emerald-300 overflow-x-auto">// Kadane for minimum:
+long long curr=a[0], mn=a[0];
+for(int i=1;i&lt;n;i++){ curr=min(a[i],curr+a[i]); mn=min(mn,curr); }
+cout &lt;&lt; total - 2*mn;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem E -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-E">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">E</span>
+                        <div><div class="font-bold text-white text-lg">Dominance Count</div><div class="text-xs text-slate-400">Prefix + Inversion Count</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-orange-900 text-orange-300">★ 1600</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">1500 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-E">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Count pairs (l, r) where <code class="text-sky-400">sum(a[l..r]) ≥ 0</code>.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">4
+1 -1 2 3</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">7</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 2×10⁵<br>|a[i]| ≤ 10⁹</div></div>
+                        </div>
+                    </div>
+                    <textarea id="ans-E" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('E', 1500)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('E')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-E" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Insight: Total pairs − inversions in prefix array</p>
+                        <p class="text-slate-300 mb-2">sum(l,r)≥0 ↔ P[r]≥P[l−1]. Count pairs (i&lt;j) in P[0..n] with P[j]≥P[i] = C(n+1,2) − inversions.</p>
+                        <pre class="text-emerald-300 overflow-x-auto">// Build P[0..n], then merge-sort inversion count
+// Answer = (n+1)*n/2 - inversions</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem F -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-F">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">F</span>
+                        <div><div class="font-bold text-white text-lg">Circular Champion</div><div class="text-xs text-slate-400">Circular Kadane</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-red-900 text-red-300">★ 1700</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">1750 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-F">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Find max sum non-empty subarray in a <strong>circular</strong> array.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">5
+5 -2 3 -6 4</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">10</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 3×10⁴<br>|a[i]| ≤ 10⁴</div></div>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-500">Wrap: 4+5−2+3=10 (indices 4,0,1,2).</div>
+                    </div>
+                    <textarea id="ans-F" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('F', 1750)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('F')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-F" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Two cases: linear max vs total − min_subarray</p>
+                        <p class="text-red-400 mb-1">🚨 Guard: if max_linear &lt; 0 (all negative), return max_linear.</p>
+                        <pre class="text-emerald-300 overflow-x-auto">// Run Kadane for max AND min simultaneously
+// ans = max(max_linear, total - min_linear)
+// Guard: if(max_linear &lt; 0) return max_linear;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem G -->
+            <div class="problem-card bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden" id="card-G">
+                <div class="px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black text-white bg-slate-700 w-10 h-10 rounded-xl flex items-center justify-center">G</span>
+                        <div><div class="font-bold text-white text-lg">Double Harvest</div><div class="text-xs text-slate-400">Two-Pass Kadane</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="diff-tag bg-purple-900 text-purple-300">★ 1900</span>
+                        <span class="diff-tag bg-slate-700 text-slate-300">2000 pts</span>
+                        <span class="badge bg-slate-700 text-slate-300" id="status-G">Not Started</span>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="bg-slate-900 rounded-xl p-4 text-sm text-slate-300 mb-3 leading-relaxed">
+                        <p>Choose <strong>two non-overlapping non-empty subarrays</strong> [l1,r1] and [l2,r2] with r1 &lt; l2. Maximize combined sum.</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Input</div><pre class="text-emerald-300">4
+-1 3 -2 4</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Output</div><pre class="text-yellow-300">7</pre></div>
+                            <div class="bg-slate-800 p-2 rounded"><div class="text-slate-500 mb-1">Constraints</div><div class="text-slate-400">n ≤ 2×10⁵<br>|a[i]| ≤ 10⁹</div></div>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-500">[3] + [4] = 7. Or [-1,3,-2,4] requires split: [3]+[4]=7.</div>
+                    </div>
+                    <textarea id="ans-G" rows="3" placeholder="Your approach..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-sky-500 mb-2"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="submitProblem('G', 2000)" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">✓ Mark Solved</button>
+                        <button onclick="toggleEditorial('G')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-4 py-2 rounded-lg text-sm transition">📖 Editorial</button>
+                    </div>
+                    <div id="editorial-G" class="hidden mt-3 bg-slate-900 border border-slate-600 rounded-xl p-4 text-xs">
+                        <p class="text-amber-300 font-bold mb-1">💡 Precompute L[i] and R[i], then max(L[i]+R[i+1])</p>
+                        <p class="text-slate-300 mb-2">L[i] = best subarray sum in a[0..i] (running max Kadane forward).<br>R[i] = best subarray sum in a[i..n−1] (running max Kadane backward).</p>
+                        <pre class="text-emerald-300 overflow-x-auto">// Forward: curr=best=a[0], L[0]=best
+// for i>0: curr=max(a[i],curr+a[i]); best=max(best,curr); L[i]=best
+// Backward similarly for R[]
+// ans = max(L[i]+R[i+1]) for i in 0..n-2</pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    // Timer
+    const TOTAL = 2.5 * 3600;
+    let remaining = TOTAL, interval = null, running = false;
+
+    function fmt(s) {
+        const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+        return [h,m,sec].map(v=>String(v).padStart(2,'0')).join(':');
+    }
+    function startTimer() {
+        if (running) return;
+        running = true;
+        document.getElementById('btnStart').classList.add('hidden');
+        document.getElementById('btnPause').classList.remove('hidden');
+        interval = setInterval(() => {
+            remaining--;
+            document.getElementById('timer').textContent = fmt(remaining);
+            document.getElementById('timerBar').style.width = (remaining/TOTAL*100)+'%';
+            if (remaining <= 600) document.getElementById('timer').classList.add('timer-danger');
+            if (remaining <= 0) { clearInterval(interval); document.getElementById('timer').textContent = '0:00:00'; }
+        }, 1000);
+    }
+    function pauseTimer() {
+        clearInterval(interval); running = false;
+        document.getElementById('btnStart').classList.remove('hidden');
+        document.getElementById('btnPause').classList.add('hidden');
+    }
+    function resetTimer() {
+        clearInterval(interval); running = false; remaining = TOTAL;
+        document.getElementById('timer').textContent = fmt(remaining);
+        document.getElementById('timer').classList.remove('timer-danger');
+        document.getElementById('timerBar').style.width = '100%';
+        document.getElementById('btnStart').classList.remove('hidden');
+        document.getElementById('btnPause').classList.add('hidden');
+    }
+
+    // Scoring
+    const problems = ['A','B','C','D','E','F','G'];
+    const pts = {A:500,B:750,C:1000,D:1250,E:1500,F:1750,G:2000};
+    let score = 0;
+    const solved = {};
+
+    function buildScoreboard() {
+        const sb = document.getElementById('scoreBoard');
+        sb.innerHTML = problems.map(p => `
+            <div class="flex justify-between items-center py-1.5 border-b border-slate-700" id="sb-${p}">
+                <span class="font-bold text-slate-300">${p}</span>
+                <span class="text-xs text-slate-500" id="sb-label-${p}">—</span>
+                <span class="font-mono font-bold text-slate-500" id="sb-score-${p}">0</span>
+            </div>
+        `).join('');
+    }
+
+    function submitProblem(id, points) {
+        if (solved[id]) return;
+        solved[id] = true;
+        score += points;
+        document.getElementById('scoreDisplay').textContent = score;
+        document.getElementById(`status-${id}`).textContent = '✓ Solved';
+        document.getElementById(`status-${id}`).className = 'badge bg-green-900 text-green-300';
+        document.getElementById(`card-${id}`).classList.add('solved');
+        document.getElementById(`sb-score-${id}`).textContent = points;
+        document.getElementById(`sb-score-${id}`).className = 'font-mono font-bold text-green-400';
+        document.getElementById(`sb-label-${id}`).textContent = 'Solved';
+        document.getElementById(`sb-label-${id}`).className = 'text-xs text-green-400';
+    }
+
+    function toggleEditorial(id) {
+        const el = document.getElementById(`editorial-${id}`);
+        el.classList.toggle('hidden');
+        if (!solved[id]) {
+            document.getElementById(`status-${id}`).textContent = '👁 Peeked';
+            document.getElementById(`status-${id}`).className = 'badge bg-amber-900 text-amber-300';
+        }
+    }
+
+    buildScoreboard();
+</script>
+</body>
+</html>

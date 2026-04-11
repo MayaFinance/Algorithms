@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1: Two Pointers — Same Direction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{font-family:'Inter',-apple-system,sans-serif;background:#f8fafc;color:#1e293b;}
+        .task-checkbox{appearance:none;background:#fff;width:1.4em;height:1.4em;border:2px solid #cbd5e1;border-radius:.25em;display:grid;place-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;}
+        .task-checkbox::before{content:"";width:.75em;height:.75em;transform:scale(0);transition:120ms transform ease-in-out;box-shadow:inset 1em 1em white;clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%);}
+        .task-checkbox:checked{background:#0ea5e9;border-color:#0ea5e9;}
+        .task-checkbox:checked::before{transform:scale(1);}
+        .task-row.done .task-text{color:#94a3b8;text-decoration:line-through;}
+        .chart-container{position:relative;width:100%;max-width:220px;margin:auto;height:220px;}
+        pre,code{font-family:'ui-monospace','Menlo',monospace;}
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Week 2 · Day 1</div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Two Pointers — Same Direction</h1>
+        </div>
+        <div class="bg-sky-50 px-4 py-2 rounded-xl border border-sky-100">
+            <div class="text-lg font-bold text-sky-700">Fast / Slow Pointer Mastery</div>
+            <div class="text-xs font-bold text-sky-500 uppercase">⚡ O(n) · O(1) Space</div>
+        </div>
+    </div>
+</header>
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- SIDEBAR -->
+        <div class="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+            <section class="bg-sky-600 text-white p-5 rounded-2xl shadow-lg">
+                <h2 class="text-lg font-bold mb-2">🎯 Core Insight</h2>
+                <p class="text-sky-100 text-sm leading-relaxed"><strong>Fast always moves.</strong> Slow moves only when a condition is met. Zero extra memory needed — the output is built in the same array.</p>
+                <div class="mt-3 bg-sky-800 p-3 rounded-xl font-mono text-xs text-sky-200">
+                    if keep(arr[fast]):<br>&nbsp;&nbsp;arr[slow++] = arr[fast]
+                </div>
+            </section>
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-4">Progress · 14h Plan</h3>
+                <div class="chart-container mb-4"><canvas id="progressChart"></canvas></div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-2xl font-extrabold text-slate-800" id="hDone">0<span class="text-base text-slate-400 font-medium">h</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase">Completed</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-2xl font-extrabold text-slate-800">14<span class="text-base text-slate-400 font-medium">h</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase">Total</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1"><span class="font-bold text-slate-700">Completion</span><span class="font-bold text-sky-600" id="pct">0%</span></div>
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden"><div class="bg-sky-500 h-2.5 rounded-full transition-all duration-700" style="width:0" id="pBar"></div></div>
+                </div>
+            </section>
+            <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-700 mb-2 text-sm">🗺️ Pattern Triggers</h3>
+                <div class="text-xs space-y-1 text-slate-600">
+                    <div class="bg-sky-50 px-2 py-1 rounded">• "in-place" / "without extra space"</div>
+                    <div class="bg-sky-50 px-2 py-1 rounded">• "remove / filter maintaining order"</div>
+                    <div class="bg-sky-50 px-2 py-1 rounded">• "skip duplicates"</div>
+                    <div class="bg-sky-50 px-2 py-1 rounded">• "longest subarray where..."</div>
+                    <div class="bg-sky-50 px-2 py-1 rounded">• "find pair i&lt;j with property"</div>
+                </div>
+            </section>
+        </div>
+        <!-- MAIN -->
+        <div class="lg:col-span-8 space-y-5">
+            <!-- Block 1 Theory -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="absolute-left-bar"></div>
+                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📚 Block 1 — Theory & Recognition</h2>
+                    <span class="text-xs font-bold bg-sky-100 text-sky-800 px-3 py-1 rounded-full">⏱ 2h</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-t1">
+                        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('t1',1)"><span class="task-text font-semibold text-slate-800">Read all 11 concept sections in concepts.md</span></label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-t2">
+                        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('t2',0.5)"><span class="task-text font-semibold text-slate-800">Write fast/slow template from memory</span></label>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-t3">
+                        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('t3',0.5)"><span class="task-text font-semibold text-slate-800">Distinguish sliding window vs write-pointer (3 differences)</span></label>
+                    </div>
+                    <div class="bg-sky-50 border-l-4 border-sky-400 p-3 rounded-r-xl text-sm text-sky-900">
+                        <button onclick="toggle('q-template')" class="text-xs font-bold bg-sky-200 text-sky-800 px-2 py-1 rounded uppercase">Reveal Template</button>
+                        <div id="q-template" class="hidden mt-2 font-mono text-xs bg-slate-800 text-sky-300 p-3 rounded-xl">int slow=0;<br>for(int fast=0;fast&lt;n;fast++)<br>&nbsp;&nbsp;if(keep(arr[fast]))<br>&nbsp;&nbsp;&nbsp;&nbsp;arr[slow++]=arr[fast];<br>return slow;</div>
+                    </div>
+                </div>
+            </section>
+            <!-- Block 2 Easy -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🟢 Block 2 — Easy Problems (P1–P4)</h2>
+                    <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">⏱ 2h</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div id="p-cards-easy"></div>
+                </div>
+            </section>
+            <!-- Block 3 Medium -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🟡 Block 3 — Medium Problems (P5–P9)</h2>
+                    <span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full">⏱ 4h</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div id="p-cards-med"></div>
+                </div>
+            </section>
+            <!-- Block 4 Hard -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🔴 Block 4 — Hard / Sliding Window (P10–P12)</h2>
+                    <span class="text-xs font-bold bg-rose-100 text-rose-800 px-3 py-1 rounded-full">⏱ 4h</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div id="p-cards-hard"></div>
+                </div>
+            </section>
+            <!-- Block 5 Quiz -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🎙️ Block 5 — Quiz & Consolidation</h2>
+                    <span class="text-xs font-bold bg-violet-100 text-violet-800 px-3 py-1 rounded-full">⏱ 2h</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-q1"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('q1',0.5)"><span class="task-text font-semibold text-slate-800">Q1: What should slow be initialized to in Remove Duplicates?</span></label>
+                        <div class="ml-8 mt-1"><button onclick="toggle('a1')" class="text-xs bg-violet-100 text-violet-800 px-2 py-1 rounded font-bold uppercase">Answer</button><div id="a1" class="hidden mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">slow = 1 (first element always kept; slow = next write pos)</div></div>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-q2"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('q2',0.5)"><span class="task-text font-semibold text-slate-800">Q2: Why does Floyd's Phase 2 (reset slow) find the cycle start?</span></label>
+                        <div class="ml-8 mt-1"><button onclick="toggle('a2')" class="text-xs bg-violet-100 text-violet-800 px-2 py-1 rounded font-bold uppercase">Answer</button><div id="a2" class="hidden mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">Distance head→cycle_start = distance meeting_point→cycle_start (provable: 2S = F, 2(x+y) = x+y+nL → x = nL-y)</div></div>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-q3"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('q3',0.5)"><span class="task-text font-semibold text-slate-800">Q3: Why does sliding window fail for exact subarray sum = k?</span></label>
+                        <div class="ml-8 mt-1"><button onclick="toggle('a3')" class="text-xs bg-violet-100 text-violet-800 px-2 py-1 rounded font-bold uppercase">Answer</button><div id="a3" class="hidden mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">Negatives break monotonicity — adding elements can decrease sum, so shrinking left doesn't restore validity. Use prefix + HashMap.</div></div>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-q4"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('q4',0.5)"><span class="task-text font-semibold text-slate-800">Q4: Why fill from back in merge sorted arrays?</span></label>
+                        <div class="ml-8 mt-1"><button onclick="toggle('a4')" class="text-xs bg-violet-100 text-violet-800 px-2 py-1 rounded font-bold uppercase">Answer</button><div id="a4" class="hidden mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">Front-fill overwrites nums1 elements before reading them. Back-fill uses the empty tail — safe because we only write to positions ≥ max(i,j).</div></div>
+                    </div>
+                    <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-q5"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="task-checkbox" onchange="tick('q5',0.5)"><span class="task-text font-semibold text-slate-800">Q5: At end of remove-element, is slow the new length or last index?</span></label>
+                        <div class="ml-8 mt-1"><button onclick="toggle('a5')" class="text-xs bg-violet-100 text-violet-800 px-2 py-1 rounded font-bold uppercase">Answer</button><div id="a5" class="hidden mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded">slow is the NEW LENGTH. Last valid element is at slow-1 (0-indexed).</div></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+<script>
+const problems = {
+    easy: [
+        {id:'p1',title:'P1: Remove Element (LC 27)',desc:'Remove all val occurrences in-place. Return new length.',hint:'Fast reads all; slow writes non-val. Return slow.',hrs:.75},
+        {id:'p2',title:'P2: Remove Duplicates I (LC 26)',desc:'Sorted array — remove duplicates. Return new length.',hint:'Compare fast to arr[slow-1]. If different, write.',hrs:.75},
+        {id:'p3',title:'P3: Remove Duplicates II (LC 80)',desc:'Keep at most 2 copies each. Sorted.',hint:'Compare fast to arr[slow-2]. If fast!=arr[slow-2], write.',hrs:.75},
+        {id:'p4',title:'P4: Move Zeros (LC 283)',desc:'Move zeros to end, maintain order. In-place.',hint:'Write all non-zeros, then fill tail with zeros.',hrs:.75},
+    ],
+    med: [
+        {id:'p5',title:'P5: Squares of Sorted Array (LC 977)',desc:'Return sorted squares. Input may have negatives.',hint:'Two-end pointers. Fill result from back with larger square.',hrs:.75},
+        {id:'p6',title:'P6: Find Duplicate — Floyd\'s Cycle (LC 287)',desc:'n+1 integers in [1,n], one duplicate. O(1) space.',hint:'Phase 1: slow×1 fast×2 until meet. Phase 2: reset slow to nums[0], move both ×1.',hrs:1.25},
+        {id:'p7',title:'P7: Longest Substring No Repeat (LC 3)',desc:'Find longest substring without repeating characters.',hint:'Sliding window + last-seen index map. Move left to last[c]+1.',hrs:.75},
+        {id:'p8',title:'P8: Min Size Subarray Sum (LC 209)',desc:'Positive array, sum ≥ s. Min length subarray.',hint:'Sliding window — shrink left while sum ≥ s.',hrs:.75},
+        {id:'p9',title:'P9: Merge Sorted Array (LC 88)',desc:'Merge nums2 into nums1 in-place, sorted.',hint:'Three pointers, fill from back. While j>=0 place larger of nums1[i] vs nums2[j].',hrs:.75},
+    ],
+    hard: [
+        {id:'p10',title:'P10: Count Pairs Sum < K',desc:'Sorted array. Count pairs (i<j) where a[i]+a[j]<k.',hint:'Sort + two-end pointers. If sum<k: count += r-l, then l++. Else r--.',hrs:1.5},
+        {id:'p11',title:'P11: Subarray Product < K (LC 713)',desc:'Count subarrays with product < k.',hint:'Sliding window. prod*=right; while prod≥k: prod/=left++. ans+=r-l+1.',hrs:1.25},
+        {id:'p12',title:'P12: Max Consecutive Ones III (LC 1004)',desc:'Binary array, flip ≤ k zeros. Longest ones run.',hint:'Track zero count in window. Shrink left when zeros>k.',hrs:1.25},
+    ]
+};
+const tasksHrs = {t1:1,t2:.5,t3:.5,q1:.5,q2:.5,q3:.5,q4:.5,q5:.5};
+const TOTAL = 14;
+let done = new Set(), completedHrs = 0;
+let chart;
+
+function buildProblemCards() {
+    ['easy','med','hard'].forEach(level => {
+        const container = document.getElementById('p-cards-' + level);
+        const colors = {easy:'emerald',med:'amber',hard:'rose'};
+        const c = colors[level];
+        container.innerHTML = problems[level].map(p => `
+            <div class="task-row p-3 hover:bg-slate-50 rounded-xl" id="t-${p.id}">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" class="task-checkbox mt-0.5" onchange="tick('${p.id}',${p.hrs})">
+                    <span class="task-text font-semibold text-slate-800">${p.title}</span>
+                </label>
+                <div class="ml-8 mt-1">
+                    <p class="text-xs text-slate-500 mb-1">${p.desc}</p>
+                    <button onclick="toggle('h-${p.id}')" class="text-xs bg-${c}-100 text-${c}-800 px-2 py-1 rounded font-bold uppercase">Hint</button>
+                    <div id="h-${p.id}" class="hidden mt-2 text-xs bg-slate-800 text-${c}-300 px-3 py-2 rounded-xl">${p.hint}</div>
+                </div>
+            </div>`).join('');
+    });
+}
+
+function tick(id, hrs) {
+    const row = document.getElementById('t-' + id);
+    if (done.has(id)) { done.delete(id); completedHrs -= hrs; row.classList.remove('done'); }
+    else { done.add(id); completedHrs += hrs; row.classList.add('done'); }
+    updateDash();
+}
+function toggle(id) { document.getElementById(id).classList.toggle('hidden'); }
+function updateDash() {
+    const h = Math.min(completedHrs, TOTAL);
+    const pct = Math.round(h/TOTAL*100);
+    document.getElementById('hDone').innerHTML = h.toFixed(1)+'<span class="text-base text-slate-400 font-medium">h</span>';
+    document.getElementById('pct').textContent = pct+'%';
+    document.getElementById('pBar').style.width = pct+'%';
+    if(chart){ chart.data.datasets[0].data=[h,TOTAL-h]; chart.update(); }
+}
+function initChart() {
+    chart = new Chart(document.getElementById('progressChart').getContext('2d'), {
+        type:'doughnut',
+        data:{datasets:[{data:[0,TOTAL],backgroundColor:['#0ea5e9','#f1f5f9'],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'80%',plugins:{legend:{display:false}}},
+        plugins:[{id:'ct',beforeDraw:c=>{
+            const{width:w,height:h,ctx}=c;ctx.restore();
+            const pct=Math.round(c.data.datasets[0].data[0]/TOTAL*100)||0;
+            ctx.font='900 '+(h/100).toFixed(2)+'em Inter,sans-serif';ctx.textBaseline='middle';ctx.fillStyle='#1e293b';
+            ctx.fillText(pct+'%',Math.round((w-ctx.measureText(pct+'%').width)/2),h/2.1);
+            ctx.font='bold '+(h/250).toFixed(2)+'em Inter,sans-serif';ctx.fillStyle='#64748b';
+            ctx.fillText('DONE',Math.round((w-ctx.measureText('DONE').width)/2),h/2.1+h*.18);ctx.save();
+        }}]
+    });
+}
+document.addEventListener('DOMContentLoaded',()=>{ buildProblemCards(); initChart(); });
+</script>
+</body>
+</html>
