@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 2: Palindromes & Substrings</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .problem-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .problem-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .problem-card.completed {
+            border-color: var(--success-color);
+        }
+
+        .problem-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .problem-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .badge.easy { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge.medium { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge.hard { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        
+        .badge.tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            appearance: none;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 1.2rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Day 2: Palindromes & Substrings</h1>
+            <p class="subtitle">Master symmetry and sliding windows with these 10 core problems.</p>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+        </div>
+
+        <div class="problem-list" id="problemList">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <script>
+        const problems = [
+            { id: 1, title: "Valid Palindrome", diff: "easy", tag: "Two Pointers" },
+            { id: 2, title: "Valid Palindrome II", diff: "easy", tag: "Two Pointers" },
+            { id: 3, title: "Longest Palindrome", diff: "easy", tag: "Greedy / Hash" },
+            { id: 4, title: "Longest Substring Without Repeating Characters", diff: "medium", tag: "Sliding Window" },
+            { id: 5, title: "Longest Repeating Character Replacement", diff: "medium", tag: "Sliding Window" },
+            { id: 6, title: "Palindromic Substrings", diff: "medium", tag: "Expand Around Center" },
+            { id: 7, title: "Longest Palindromic Substring", diff: "medium", tag: "DP / Expand" },
+            { id: 8, title: "Repeated DNA Sequences", diff: "medium", tag: "Substring Hashing" },
+            { id: 9, title: "Palindrome Partitioning", diff: "medium", tag: "Backtracking / DP" },
+            { id: 10, title: "Longest Palindromic Substring (Manacher's)", diff: "hard", tag: "Advanced O(N)" }
+        ];
+
+        const problemList = document.getElementById('problemList');
+        const completedCountEl = document.getElementById('completedCount');
+        const progressBar = document.getElementById('progressBar');
+
+        let completedIds = JSON.parse(localStorage.getItem('w4d2_completed')) || [];
+
+        function init() {
+            problems.forEach(p => {
+                const isCompleted = completedIds.includes(p.id);
+                
+                const card = document.createElement('div');
+                card.className = \`problem-card \${isCompleted ? 'completed' : ''}\`;
+                card.id = \`card-\${p.id}\`;
+                
+                card.innerHTML = \`
+                    <div class="problem-info">
+                        <h3>P\${p.id}: \${p.title}</h3>
+                        <div class="badges">
+                            <span class="badge \${p.diff}">\${p.diff.toUpperCase()}</span>
+                            <span class="badge tag">\${p.tag}</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-\${p.id}" \${isCompleted ? 'checked' : ''} onchange="toggle(\${p.id})">
+                    </div>
+                \`;
+                problemList.appendChild(card);
+            });
+            updateStats();
+        }
+
+        window.toggle = function(id) {
+            const index = completedIds.indexOf(id);
+            if(index === -1) {
+                completedIds.push(id);
+                document.getElementById(\`card-\${id}\`).classList.add('completed');
+            } else {
+                completedIds.splice(index, 1);
+                document.getElementById(\`card-\${id}\`).classList.remove('completed');
+            }
+            localStorage.setItem('w4d2_completed', JSON.stringify(completedIds));
+            updateStats();
+        };
+
+        function updateStats() {
+            const count = completedIds.length;
+            completedCountEl.textContent = count;
+            progressBar.style.width = \`\${(count / 10) * 100}%\`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
