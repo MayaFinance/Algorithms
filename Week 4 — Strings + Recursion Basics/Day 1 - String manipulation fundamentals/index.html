@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day 2: Palindromes & Substrings</title>
+    <title>Day 1: String Manipulation Fundamentals</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -203,8 +203,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Day 2: Palindromes & Substrings</h1>
-            <p class="subtitle">Master symmetry and sliding windows with these 10 core problems.</p>
+            <h1>Day 1: String Manipulation Fundamentals</h1>
+            <p class="subtitle">Master ASCII bounds, 2-pointer boundaries, and dynamic mappings.</p>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
@@ -228,23 +228,23 @@
 
     <script>
         const problems = [
-            { id: 1, title: "Valid Palindrome", diff: "easy", tag: "Two Pointers" },
-            { id: 2, title: "Valid Palindrome II", diff: "easy", tag: "Two Pointers" },
-            { id: 3, title: "Longest Palindrome", diff: "easy", tag: "Greedy / Hash" },
-            { id: 4, title: "Longest Substring Without Repeating Characters", diff: "medium", tag: "Sliding Window" },
-            { id: 5, title: "Longest Repeating Character Replacement", diff: "medium", tag: "Sliding Window" },
-            { id: 6, title: "Palindromic Substrings", diff: "medium", tag: "Expand Around Center" },
-            { id: 7, title: "Longest Palindromic Substring", diff: "medium", tag: "DP / Expand" },
-            { id: 8, title: "Repeated DNA Sequences", diff: "medium", tag: "Substring Hashing" },
-            { id: 9, title: "Palindrome Partitioning", diff: "medium", tag: "Backtracking / DP" },
-            { id: 10, title: "Longest Palindromic Substring (Manacher's)", diff: "hard", tag: "Advanced O(N)" }
+            { id: 1, title: "Reverse String", diff: "easy", tag: "Two Pointers" },
+            { id: 2, title: "Reverse Vowels of a String", diff: "easy", tag: "Conditional Pointers" },
+            { id: 3, title: "Valid Anagram", diff: "easy", tag: "Frequency Counting" },
+            { id: 4, title: "Isomorphic Strings", diff: "easy", tag: "ASCII Mapping" },
+            { id: 5, title: "Longest Common Prefix", diff: "easy", tag: "Prefix Logic" },
+            { id: 6, title: "Find the Index of the First Occurrence", diff: "medium", tag: "Pattern Match" },
+            { id: 7, title: "Find All Anagrams in a String", diff: "medium", tag: "Hash/Sliding" },
+            { id: 8, title: "Group Anagrams", diff: "medium", tag: "Hash Key Build" },
+            { id: 9, title: "String to Integer (atoi)", diff: "medium", tag: "Parsing & Traps" },
+            { id: 10, title: "Reverse Words in a String", diff: "medium", tag: "In-Place Logic" }
         ];
 
         const problemList = document.getElementById('problemList');
         const completedCountEl = document.getElementById('completedCount');
         const progressBar = document.getElementById('progressBar');
 
-        let completedIds = JSON.parse(localStorage.getItem('w4d2_completed')) || [];
+        let completedIds = JSON.parse(localStorage.getItem('w4d1_completed')) || [];
 
         function init() {
             problems.forEach(p => {
@@ -253,7 +253,7 @@
                 const card = document.createElement('div');
                 card.className = `problem-card ${isCompleted ? 'completed' : ''}`;
                 card.id = `card-${p.id}`;
-
+                
                 // Add click handler to the whole card
                 card.onclick = () => {
                     const cb = document.getElementById(`check-${p.id}`);
@@ -287,7 +287,7 @@
                 completedIds.splice(index, 1);
                 document.getElementById(`card-${id}`).classList.remove('completed');
             }
-            localStorage.setItem('w4d2_completed', JSON.stringify(completedIds));
+            localStorage.setItem('w4d1_completed', JSON.stringify(completedIds));
             updateStats();
         };
 
